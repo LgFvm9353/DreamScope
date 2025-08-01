@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    // @ 匹配src路径
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "name": "dream-journal",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@react-vant/icons": "^0.1.0",
+    "axios": "^1.11.0",
+    "dayjs": "^1.11.13",
+    "echarts": "^6.0.0",
+    "echarts-for-react": "^3.0.2",
+    "framer-motion": "^12.23.12",
+    "jwt": "^0.2.0",
+    "lib-flexible": "^0.3.2",
+    "next": "15.4.5",
+    "postcss-px-to-viewport": "^1.1.1",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-vant": "^3.3.5",
+    "zustand": "^5.0.7"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^9",
+    "eslint-config-next": "15.4.5",
+    "postcss": "^8.5.6"
+  }
+}
