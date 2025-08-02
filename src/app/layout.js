@@ -5,7 +5,6 @@ import { Tabbar, TabbarItem } from 'react-vant'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { routes, getRouteIndex } from '@/config/routes'
-import { preloadRoute } from '@/hooks/useLazyRoute'
 
 export default function RootLayout({ children }) {
   const pathname = usePathname()
@@ -20,27 +19,8 @@ export default function RootLayout({ children }) {
 
   const handleChange = (value) => {
     setActive(value)
-    const targetPath = routes[value].path
-    
-    // 预加载目标路由
-    preloadRoute(targetPath).then(() => {
-      router.push(targetPath)
-    })
+    router.push(routes[value].path)
   }
-
-  // 预加载相邻路由
-  useEffect(() => {
-    const currentIndex = getRouteIndex(pathname)
-    if (currentIndex >= 0) {
-      // 预加载下一个路由
-      const nextIndex = (currentIndex + 1) % routes.length
-      preloadRoute(routes[nextIndex].path)
-      
-      // 预加载上一个路由
-      const prevIndex = currentIndex === 0 ? routes.length - 1 : currentIndex - 1
-      preloadRoute(routes[prevIndex].path)
-    }
-  }, [pathname])
 
   return (
     <html lang="zh-CN">
@@ -56,7 +36,7 @@ export default function RootLayout({ children }) {
       <body className="min-h-screen bg-background text-foreground">
         <div className="safe-area">
           {/* 主要内容区域 */}
-          <div className="pb-16">
+          <div className="pb-20"> 
             {children}
           </div>
           

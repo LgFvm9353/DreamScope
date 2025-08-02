@@ -1,0 +1,434 @@
+.container {
+  min-height: 100vh;
+  background: #f7f8fa;
+}
+
+.content {
+  padding: 16px;
+  padding-top: 60px;
+}
+
+/* 文本域样式 */
+.textareaWrapper {
+  padding: 12px 16px;
+}
+
+.textArea {
+  width: 100%;
+  min-height: 120px;
+  font-size: 14px;
+  line-height: 1.6;
+  padding: 12px;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  resize: vertical;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.textArea:focus {
+  outline: none;
+  border-color: var(--rv-primary-color);
+  box-shadow: 0 0 0 2px rgba(var(--rv-primary-color), 0.1);
+}
+
+.charCount {
+  text-align: right;
+  font-size: 12px;
+  color: #999;
+  margin-top: 8px;
+}
+
+/* 情绪网格 */
+.emotionGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  padding: 12px 0;
+}
+
+.emotionItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 8px;
+  border: 2px solid #e8e8e8;
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 60px;
+}
+
+.emotionItem:hover {
+  border-color: var(--rv-primary-color);
+  background: rgba(var(--rv-primary-color), 0.05);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.emotionItem.selected {
+  border-color: var(--rv-primary-color);
+  background: rgba(var(--rv-primary-color), 0.1);
+  box-shadow: 0 2px 8px rgba(var(--rv-primary-color), 0.3);
+}
+
+.emotionIcon {
+  font-size: 24px;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.emotionLabel {
+  font-size: 12px;
+  color: #666;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.emotionItem.selected .emotionLabel {
+  color: var(--rv-primary-color);
+  font-weight: 600;
+}
+
+/* 类型网格 */
+.typeGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  padding: 12px 0;
+}
+
+.typeItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 8px;
+  border: 2px solid #e8e8e8;
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 60px;
+}
+
+.typeItem:hover {
+  border-color: var(--rv-primary-color);
+  background: rgba(var(--rv-primary-color), 0.05);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.typeItem.selected {
+  border-color: var(--rv-primary-color);
+  background: rgba(var(--rv-primary-color), 0.1);
+  box-shadow: 0 2px 8px rgba(var(--rv-primary-color), 0.3);
+}
+
+.typeIcon {
+  font-size: 24px;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.typeLabel {
+  font-size: 12px;
+  color: #666;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.typeItem.selected .typeLabel {
+  color: var(--rv-primary-color);
+  font-weight: 600;
+}
+
+/* 标签容器 */
+.tagsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 0;
+  align-items: center;
+}
+
+.tag {
+  margin: 0;
+}
+
+.tagInput {
+  flex: 1;
+  min-width: 120px;
+}
+
+/* 单选按钮样式 */
+.radioItem {
+  margin-bottom: 12px;
+}
+
+.radioContent {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+}
+
+.radioIcon {
+  font-size: 20px;
+  margin-right: 12px;
+}
+
+.radioText {
+  flex: 1;
+}
+
+.radioLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.radioDesc {
+  font-size: 12px;
+  color: #666;
+  line-height: 1.4;
+}
+
+/* 操作按钮 */
+.actions {
+  margin-top: 32px;
+  padding: 0 16px;
+  margin-bottom: 80px;
+}
+
+.saveButton {
+  width: 100%;
+  height: 48px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* 加载遮罩 */
+.loadingOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.loadingSpinner {
+  background: white;
+  padding: 20px 30px;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.loadingSpinner::before {
+  content: '';
+  width: 16px;
+  height: 16px;
+  border: 2px solid #e8e8e8;
+  border-top: 2px solid var(--rv-primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .content {
+    padding: 12px;
+  }
+  
+  .emotionGrid,
+  .typeGrid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+  
+  .emotionItem,
+  .typeItem {
+    padding: 10px 6px;
+    min-height: 50px;
+  }
+  
+  .emotionIcon,
+  .typeIcon {
+    font-size: 20px;
+  }
+  
+  .emotionLabel,
+  .typeLabel {
+    font-size: 11px;
+  }
+  
+  .saveButton {
+    height: 44px;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .emotionGrid,
+  .typeGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .content {
+    padding: 8px;
+  }
+  
+  .actions {
+    padding: 0 8px;
+  }
+} 
+
+/* 模态框样式 */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.modal h3 {
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.modal p {
+  margin: 0 0 20px 0;
+  color: #666;
+  line-height: 1.5;
+}
+
+.modalButtons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+/* 标签样式 */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  background: var(--rv-primary-color);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  margin-right: 8px;
+  margin-bottom: 8px;
+}
+
+.tagClose {
+  background: none;
+  border: none;
+  color: white;
+  margin-left: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tagClose:hover {
+  opacity: 0.8;
+}
+
+/* 保存选项样式 */
+.saveOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 0;
+}
+
+.saveOption {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  border: 2px solid #e8e8e8;
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.saveOption:hover {
+  border-color: var(--rv-primary-color);
+  background: rgba(var(--rv-primary-color), 0.05);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.saveOption.selected {
+  border-color: var(--rv-primary-color);
+  background: rgba(var(--rv-primary-color), 0.1);
+  box-shadow: 0 2px 8px rgba(var(--rv-primary-color), 0.3);
+}
+
+.optionIcon {
+  font-size: 20px;
+  margin-right: 12px;
+}
+
+.optionText {
+  flex: 1;
+}
+
+.optionLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.optionDesc {
+  font-size: 12px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.saveOption.selected .optionLabel {
+  color: var(--rv-primary-color);
+}

@@ -1,0 +1,256 @@
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import { dreamAPI, userAPI } from '@/services/api';
+
+const useDreamStore = create(
+  persist(
+    (set, get) => ({
+      // 梦境数据
+      dreamData: {
+        content: '',
+        emotion: '',
+        type: '',
+        tags: [],
+        timestamp: null,
+      },
+      
+      // 保存选项
+      saveOption: 'save_only',
+      
+      // 加载状态
+      loading: false,
+      
+      // 草稿数据
+      draft: null,
+      
+      // 用户信息
+      user: null,
+      
+      // 梦境列表
+      dreams: [],
+      
+      // 更新梦境内容
+      updateDreamContent: (content) => {
+        set((state) => ({
+          dreamData: {
+            ...state.dreamData,
+            content,
+            timestamp: Date.now(),
+          },
+        }));
+        get().saveDraft();
+      },
+      
+      // 更新情绪
+      updateEmotion: (emotion) => {
+        set((state) => ({
+          dreamData: {
+            ...state.dreamData,
+            emotion,
+          },
+        }));
+      },
+      
+      // 更新梦境类型
+      updateType: (type) => {
+        set((state) => ({
+          dreamData: {
+            ...state.dreamData,
+            type,
+          },
+        }));
+      },
+      
+      // 更新标签
+      updateTags: (tags) => {
+        set((state) => ({
+          dreamData: {
+            ...state.dreamData,
+            tags,
+          },
+        }));
+      },
+      
+      // 更新保存选项
+      updateSaveOption: (option) => {
+        set({ saveOption: option });
+      },
+      
+      // 保存草稿
+      saveDraft: () => {
+        const { dreamData } = get();
+        if (dreamData.content.trim()) {
+          set({ draft: { ...dreamData, savedAt: Date.now() } });
+        }
+      },
+      
+      // 加载草稿
+      loadDraft: () => {
+        const { draft } = get();
+        if (draft) {
+          set({ dreamData: draft });
+          return true;
+        }
+        return false;
+      },
+      
+      // 清除草稿
+      clearDraft: () => {
+        set({ draft: null });
+      },
+      
+      // 重置梦境数据
+      resetDreamData: () => {
+        set({
+          dreamData: {
+            content: '',
+            emotion: '',
+            type: '',
+            tags: [],
+            timestamp: null,
+          },
+        });
+      },
+      
+      // 设置加载状态
+      setLoading: (loading) => {
+        set({ loading });
+      },
+      
+      // 保存梦境记录
+      saveDream: async () => {
+        const { dreamData, saveOption } = get();
+        
+        if (!dreamData.content.trim()) {
+          throw new Error('梦境内容不能为空');
+        }
+        
+        set({ loading: true });
+        
+        try {
+          const dreamRecord = {
+            ...dreamData,
+            createdAt: new Date().toISOString(),
+            analysisStatus: saveOption === 'save_only' ? 'skipped' : 'pending',
+          };
+          
+          // 调用API保存梦境
+          const result = await dreamAPI.createDream(dreamRecord);
+          
+          // 清除草稿
+          get().clearDraft();
+          
+          // 重置数据
+          get().resetDreamData();
+          
+          return { success: true, data: result };
+        } catch (error) {
+          console.error('保存梦境失败:', error);
+          throw new Error(error.response?.data?.message || '保存失败，请重试');
+        } finally {
+          set({ loading: false });
+        }
+      },
+      
+      // 获取用户梦境列表
+      getDreams: async () => {
+        try {
+          const dreams = await dreamAPI.getDreams();
+          set({ dreams });
+          return dreams;
+        } catch (error) {
+          console.error('获取梦境列表失败:', error);
+          throw error;
+        }
+      },
+      
+      // 删除梦境
+      deleteDream: async (dreamId) => {
+        try {
+          await dreamAPI.deleteDream(dreamId);
+          // 更新本地列表
+          const { dreams } = get();
+          set({ dreams: dreams.filter(dream => dream.id !== dreamId) });
+          return { success: true };
+        } catch (error) {
+          console.error('删除梦境失败:', error);
+          throw error;
+        }
+      },
+      
+      // 分析梦境
+      analyzeDream: async (dreamId) => {
+        try {
+          const result = await dreamAPI.analyzeDream(dreamId);
+          return result;
+        } catch (error) {
+          console.error('分析梦境失败:', error);
+          throw error;
+        }
+      },
+      
+      // 用户登录
+      login: async (credentials) => {
+        try {
+          const result = await userAPI.login(credentials);
+          localStorage.setItem('jwt_token', result.token);
+          set({ user: result.user });
+          return result;
+        } catch (error) {
+          console.error('登录失败:', error);
+          throw error;
+        }
+      },
+      
+      // 用户注册
+      register: async (userData) => {
+        try {
+          const result = await userAPI.register(userData);
+          localStorage.setItem('jwt_token', result.token);
+          set({ user: result.user });
+          return result;
+        } catch (error) {
+          console.error('注册失败:', error);
+          throw error;
+        }
+      },
+      
+      // 获取用户信息
+      getUser: async () => {
+        try {
+          const user = await userAPI.getUser();
+          set({ user });
+          return user;
+        } catch (error) {
+          console.error('获取用户信息失败:', error);
+          throw error;
+        }
+      },
+      
+      // 设置用户信息
+      setUser: (user) => {
+        set({ user });
+      },
+      
+      // 登出
+      logout: () => {
+        localStorage.removeItem('jwt_token');
+        set({ 
+          user: null, 
+          dreams: [],
+          dreamData: { content: '', emotion: '', type: '', tags: [], timestamp: null } 
+        });
+      },
+    }),
+    {
+      name: 'dream-store',
+      partialize: (state) => ({
+        draft: state.draft,
+        saveOption: state.saveOption,
+        user: state.user,
+      }),
+    }
+  )
+);
+
+export default useDreamStore; 

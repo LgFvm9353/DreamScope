@@ -12,7 +12,7 @@ DreamJournal是一个基于React18+Next.js的移动端梦境记录应用，用�
 - **移动端适配**: lib-flexible + postcss-px-to-viewport
 - **样式**: CSS原子化类
 - **路由**: 懒加载 + 路径别名
-- **状态管理**: 待定
+- **状态管理**: zustand
 
 ## 项目架构
 
