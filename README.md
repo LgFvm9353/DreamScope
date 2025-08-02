@@ -136,25 +136,70 @@ const LazyRoute = ({ importFunc, fallback = <Loading /> }) => {
 - 使用 `Link` 组件进行声明式导航
 - React Vant Tabbar 底部导航
 
-## 开发规范
+## 移动端适配问题及解决方案
 
-### 代码风格
-- 使用ESLint + Prettier
-- 遵循React最佳实践
-- 组件命名使用PascalCase
-- 文件命名使用kebab-case
+### 滚动条在标签栏上显示问题
 
-### 组件开发
-- 使用React Vant组件库
-- 保持组件简洁，单一职责
-- 优先使用函数式组件
-- 合理使用Hooks
+在移动端开发中，我们遇到了页面滚动条被底部标签栏遮挡的问题，特别是在iOS设备上更为明显。这是由于安全区域（Safe Area）和视口（Viewport）设置不正确导致的。
 
-### 路径引用
-- 使用 `@/` 别名引用src目录
-- 避免使用相对路径
-- 保持导入路径的一致性
+#### 问题原因
+
+1. **安全区域（Safe Area）机制**：
+   - iOS设备（特别是全面屏iPhone）有一个底部安全区域，用于避免内容被底部手势条遮挡
+   - React Vant的Tabbar组件使用了`safeAreaInsetBottom`属性，这个属性会在底部添加额外的padding，使内容不被系统UI元素遮挡
+
+2. **视口设置**：
+   - 视口设置中缺少了`viewport-fit=cover`参数，这个参数允许内容延伸到安全区域，从而启用安全区域插入的使用
+
+3. **CSS中的安全区域处理**：
+   - 当Tabbar使用`safeAreaInsetBottom`属性时，它会自动添加底部padding，但这可能与页面的滚动区域计算不匹配
+
+#### 解决方案
+
+1. **添加viewport-fit=cover**：
+   在`layout.js`的meta标签中添加viewport-fit=cover：
+
+   ```jsx
+   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+   ```
+
+2. **统一处理安全区域**：
+   在`globals.css`中添加全局滚动容器样式：
+
+   ```css
+   /* 滚动容器通用样式 */
+   .scroll-container {
+     height: 100vh;
+     overflow-y: auto;
+     padding-bottom: calc(60px + env(safe-area-inset-bottom));
+   }
+   ```
+
+3. **修改各页面容器类**：
+   为首页、记录页和分析页的容器添加统一的类名：
+
+   ```jsx
+   <div className={`${styles.container} scroll-container`}>
+   ```
+
+4. **确保Tabbar组件正确使用safeAreaInsetBottom属性**：
+   ```jsx
+   <Tabbar 
+     value={active} 
+     onChange={handleChange}
+     className="fixed bottom-0 left-0 right-0 z-50"
+     border={false}
+     safeAreaInsetBottom={true}
+   >
+   ```
+
+通过以上修改，我们确保了：
+
+- 视口设置允许内容延伸到安全区域
+- 所有滚动容器有统一的底部padding，考虑了标签栏高度和安全区域
+- Tabbar组件正确处理底部安全区域
+
+这样，滚动条将始终显示在标签栏上方，不会被标签栏遮挡，同时在iOS设备上也能正确处理底部安全区域。
 
 ## 项目亮点和难点
 - 路由懒加载
-

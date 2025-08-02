@@ -112,7 +112,7 @@ const RecordPage = () => {
   );
 
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} scroll-container`}>
       {/* 草稿对话框 */}
       {showDraftDialogContent()}
 

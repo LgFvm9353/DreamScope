@@ -97,7 +97,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} scroll-container`}>
       
       {/* 头部区域 */}
       <div className={`${styles.header} ${styles.fadeInUp}`}>

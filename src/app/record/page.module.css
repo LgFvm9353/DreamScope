@@ -1,6 +1,8 @@
 .container {
   min-height: 100vh;
   background: #f7f8fa;
+  padding-bottom: 60px; /* 添加底部内边距，为标签栏留出空间 */
+  overflow-y: auto; /* 确保内容可滚动 */
 }
 
 .content {

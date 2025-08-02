@@ -58,7 +58,7 @@ export default function AnalysisPage() {
   
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <div className={`flex-1 ${styles.chatContainer}`}>
+      <div className={`${styles.chatContainer} scroll-container`}>
         {/* 移除 overflow-y-auto，已在CSS中设置 */}
         {messages.length === 0 ? (
           <Empty description="开始与AI助手对话，分析你的梦境" />

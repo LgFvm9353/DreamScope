@@ -25,7 +25,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="zh-CN">
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
         <meta name="format-detection" content="telephone=no" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -46,7 +46,7 @@ export default function RootLayout({ children }) {
             onChange={handleChange}
             className="fixed bottom-0 left-0 right-0 z-50"
             border={false}
-            safeAreaInsetBottom
+            safeAreaInsetBottom={true}
           >
             {routes.map((route, index) => {
               const IconComponent = route.icon
