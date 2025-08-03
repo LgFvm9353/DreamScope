@@ -1,16 +1,21 @@
 'use client'
 
-import { NavBar, Button, Card, Cell, CellGroup } from 'react-vant'
+import { NavBar, Button, Card, Cell, CellGroup, PullRefresh, Skeleton, Toast } from 'react-vant'
 import Link from 'next/link'
 import { getRouteByPath } from '@/config/routes'
 import styles from './page.module.css'
 import { useState, useEffect } from 'react'
-import useTitle from '@/hooks/useTitle'
+import useDreamStore from '@/store/dreamStore'
+
 export default function HomePage() {
-  const route = getRouteByPath('/')
   const [currentTime, setCurrentTime] = useState('')
   const [greeting, setGreeting] = useState('')
   const [isLoading, setIsLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
+  const { getDreams } = useDreamStore()
+  const [dreams, setDreams] = useState([])
+  const [error, setError] = useState(null);
+  
   // 获取当前时间和问候语
   useEffect(() => {
     const updateTime = () => {
@@ -38,11 +43,29 @@ export default function HomePage() {
     updateTime()
     const interval = setInterval(updateTime, 1000)
     
-    // 模拟加载完成
-    setTimeout(() => setIsLoading(false), 500)
+    // 加载数据
+    fetchDreams()
     
     return () => clearInterval(interval)
   }, [])
+
+  // 获取梦境数据
+  const fetchDreams = async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const dreamsData = await getDreams({ _t: Date.now() });
+      setDreams(dreamsData || []);
+    } catch (error) {
+      console.error('获取梦境数据失败:', error);
+      setError('获取数据失败，请下拉刷新重试');
+      // 如果API获取失败，使用模拟数据
+      setDreams(recentDreams);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // 模拟梦境数据
   const recentDreams = [
@@ -74,7 +97,7 @@ export default function HomePage() {
 
   // 统计数据
   const stats = {
-    total: 12,
+    total: dreams.length || 12,
     thisWeek: 3,
     thisMonth: 8
   }
@@ -85,81 +108,156 @@ export default function HomePage() {
     // 这里可以跳转到梦境详情页面
   }
 
-  if (isLoading) {
-    return (
-      <div className={styles.container}>
-        <NavBar title={route.title} />
-        <div className={styles.loading}>
-          <div className="text-lg">加载中...</div>
-        </div>
-      </div>
-    )
-  }
+  // 骨架屏组件
+  const DreamSkeleton = () => (
+    <div className={styles.container}>
+      {/* 头部 */}
+      {/* <NavBar title="加载中..." className={styles.skeletonHeader} /> */}
 
-  return (
-    <div className={`${styles.container} scroll-container`}>
-      
-      {/* 头部区域 */}
-      <div className={`${styles.header} ${styles.fadeInUp}`}>
-        <div className={styles.title}>{greeting}</div>
-        <div className={styles.subtitle}>{currentTime}</div>
-      </div>
-      
       {/* 主要内容 */}
+      <div className={styles.main}>
+        {/* 记录按钮 */}
+        <Skeleton style={{ height: 60, borderRadius: 16, marginBottom: 32 }} />
+
+        {/* 统计卡片 */}
+        <Card round className={styles.statsCard}>
+          <Card.Header>
+            <Skeleton title titleWidth="40%" />
+          </Card.Header>
+          <Card.Body>
+            <div className={styles.statsGrid}>
+              {[...Array(3)].map((_, i) => (
+                <Skeleton key={i} row={2} rowWidth={['60%', '40%']} />
+              ))}
+            </div>
+          </Card.Body>
+        </Card>
+
+        {/* 梦境列表 */}
+        <Card round className={styles.dreamsCard}>
+          <Card.Header>
+            <Skeleton title titleWidth="40%" />
+          </Card.Header>
+          <Card.Body>
+            <CellGroup>
+              {[...Array(3)].map((_, i) => (
+                <Cell 
+                  key={i} 
+                  title={<Skeleton title titleWidth="70%" />}
+                  label={<Skeleton row={1} rowWidth="40%" />}
+                  rightIcon={<Skeleton style={{ width: 60, height: 30, borderRadius: 16 }} />}
+                />
+              ))}
+            </CellGroup>
+          </Card.Body>
+        </Card>
+      </div>
+    </div>
+  )
+
+  // 使用骨架屏替代原来的加载中提示
+  if (isLoading) {
+    return <DreamSkeleton />
+  }
+  
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      // 直接获取数据，不使用fetchDreams避免触发isLoading
+      const dreamsData = await getDreams({ _t: Date.now() });
+      setDreams(dreamsData || []);
+      // 短暂延迟
+      await new Promise(resolve => setTimeout(resolve, 500));
+    } catch (error) {
+      console.error('刷新失败:', error);
+    } finally {
+      setRefreshing(false);
+    }
+    return;
+  };
+  
+  return (
+    <PullRefresh
+      className={`${styles.container} scroll-container`}
+      successText='刷新成功'
+      onRefresh={onRefresh}
+    >
+      {/* 头部区域 */}
+      <NavBar 
+        title={<>
+          {currentTime}
+          <div className={styles.subtitle}>{greeting}</div>
+        </>} 
+        className={styles.header}
+        fixed={false}
+        leftArrow={false}
+      />
+      
+      {/* 主要内容区域 */}
       <div className={styles.main}>
         {/* 快速记录按钮 */}
         <Link href="/record">
-          <button className={`${styles.recordButton} ${styles.fadeInUp}`}>
-            ✨ 记录今日梦境
-          </button>
+          <Button 
+            type="primary" 
+            block 
+            round 
+            color="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+            className={styles.recordButtonWrapper}
+          >
+            快速记录梦境
+          </Button>
         </Link>
         
         {/* 统计概览 */}
-        <div className={`${styles.statsOverview} ${styles.fadeInUp}`}>
-          <div className={styles.statsTitle}>梦境统计</div>
-          <div className={styles.statsGrid}>
-            <div className={styles.statItem}>
-              <div className={styles.statNumber}>{stats.total}</div>
-              <div className={styles.statLabel}>总记录</div>
+        <Card round className={styles.statsCard}>
+          <Card.Header>梦境统计</Card.Header>
+          <Card.Body>
+            <div className={styles.statsGrid}>
+              <div className={styles.statItem}>
+                <div className={styles.statNumber}>{stats.total}</div>
+                <div className={styles.statLabel}>总记录</div>
+              </div>
+              <div className={styles.statItem}>
+                <div className={styles.statNumber}>{stats.thisWeek}</div>
+                <div className={styles.statLabel}>本周</div>
+              </div>
+              <div className={styles.statItem}>
+                <div className={styles.statNumber}>{stats.thisMonth}</div>
+                <div className={styles.statLabel}>本月</div>
+              </div>
             </div>
-            <div className={styles.statItem}>
-              <div className={styles.statNumber}>{stats.thisWeek}</div>
-              <div className={styles.statLabel}>本周</div>
-            </div>
-            <div className={styles.statItem}>
-              <div className={styles.statNumber}>{stats.thisMonth}</div>
-              <div className={styles.statLabel}>本月</div>
-            </div>
-          </div>
-        </div>
+          </Card.Body>
+        </Card>
         
         {/* 最近梦境 */}
-        <div className={`${styles.recentDreams} ${styles.fadeInUp}`}>
-          <div className={styles.recentDreamsTitle}>最近梦境</div>
-          {recentDreams.length > 0 ? (
-            recentDreams.map((dream) => (
-              <div 
-                key={dream.id} 
-                className={styles.dreamItem}
-                onClick={() => handleDreamClick(dream)}
-              >
-                <div className={styles.dreamInfo}>
-                  <div className={styles.dreamTitle}>{dream.title}</div>
-                  <div className={styles.dreamMeta}>{dream.date}</div>
-                </div>
-                <span className={`${styles.dreamEmotion} ${styles.dreamEmotion[dream.emotion]}`}>
-                  {dream.emotionText}
-                </span>
+        <Card round className={styles.dreamsCard}>
+          <Card.Header>最近梦境</Card.Header>
+          <Card.Body>
+            {dreams.length > 0 ? (
+              <CellGroup>
+                {dreams.map(dream => (
+                  <Cell 
+                    key={dream.id} 
+                    title={dream.title}
+                    label={dream.date}
+                    clickable
+                    onClick={() => handleDreamClick(dream)}
+                    rightIcon={
+                      <div className={`${styles.dreamEmotion} ${styles[dream.emotion]}`}>
+                        {dream.emotionText}
+                      </div>
+                    }
+                  />
+                ))}
+              </CellGroup>
+            ) : (
+              <div className={styles.emptyText}>
+                {error || '暂无梦境记录，点击上方按钮开始记录'}
               </div>
-            ))
-          ) : (
-            <div className={styles.emptyState}>
-              <div className={styles.emptyIcon}>🌙</div>
-              <div className={styles.emptyText}>还没有记录梦境</div>
-            </div>
-          )}
-        </div>
+            )}
+          </Card.Body>
+        </Card>
       </div>
-    </div>
+    </PullRefresh>
   )
 }
