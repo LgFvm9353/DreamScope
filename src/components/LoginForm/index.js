@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Input, Button } from 'react-vant'; // 移除 Toast
 import useUserStore from '@/store/useUserStore';
+import { useRouter } from 'next/navigation'; // 添加这一行
 import styles from './LoginForm.module.css';
 
 const LoginForm = ({ onLoginSuccess }) => {
   const { login, generateCaptcha, validateCaptcha } = useUserStore();
+  const router = useRouter(); // 添加这一行
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [captcha, setCaptcha] = useState('');
@@ -143,6 +145,9 @@ const LoginForm = ({ onLoginSuccess }) => {
           >
             登录
           </Button>
+          <div className={styles.accountLink}>
+            没有账号？<span onClick={() => router.push('/register')}>立即注册</span>
+          </div>
         </div>
       </Form>
     </div>

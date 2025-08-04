@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Input, Button } from 'react-vant'; 
 import useUserStore from '@/store/useUserStore';
+import { useRouter } from 'next/navigation'; // 添加这一行
 import styles from './RegisterForm.module.css';
 
 const RegisterForm = ({ onRegisterSuccess }) => {
   const { register, generateCaptcha, validateCaptcha } = useUserStore();
+  const router = useRouter(); // 添加这一行
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -195,6 +197,9 @@ const RegisterForm = ({ onRegisterSuccess }) => {
           >
             注册
           </Button>
+          <div className={styles.accountLink}>
+            已有账号？<span onClick={() => router.push('/login')}>立即登录</span>
+          </div>
         </div>
       </Form>
     </div>

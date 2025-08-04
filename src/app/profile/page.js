@@ -81,9 +81,6 @@ export default function ProfilePage() {
         style={{ borderRadius: '12px', overflow: 'hidden' }}
       >
         <LoginForm onLoginSuccess={handleLoginSuccess} />
-        <div className={styles.registerLink}>
-          没有账号？<span onClick={() => router.push('/register')}>立即注册</span>
-        </div>
       </Dialog>
     )
   }
@@ -108,7 +105,6 @@ export default function ProfilePage() {
               </div>
               <div className={styles.userDetails}>
                 <div className={styles.userItem}>昵称：{user?.username || '奶龙'}</div>
-                <div className={styles.userItem}>等级：{user?.level || '5级'}</div>
                 <div className={styles.userItem}>签名：{user?.signature || '保持热爱，奔赴山海。'}</div>
               </div>
             </div>

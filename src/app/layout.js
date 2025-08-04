@@ -11,11 +11,17 @@ export default function RootLayout({ children }) {
   const router = useRouter()
   const [active, setActive] = useState(0)
 
+  // 检查是否是登录或注册页面
+  const isAuthPage = pathname === '/login' || pathname === '/register'
+
   // 根据当前路径设置激活的标签
   useEffect(() => {
+    // 如果是登录或注册页面，不更新active状态
+    if (isAuthPage) return
+    
     const currentIndex = getRouteIndex(pathname)
     setActive(currentIndex >= 0 ? currentIndex : 0)
-  }, [pathname])
+  }, [pathname, isAuthPage])
 
   const handleChange = (value) => {
     setActive(value)

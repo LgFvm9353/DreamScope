@@ -32,10 +32,6 @@ export default function RegisterPage() {
     <div className={styles.container}>
       <div className={styles.content}>
         <RegisterForm onRegisterSuccess={handleRegisterSuccess} />
-        
-        <div className={styles.loginLink}>
-          已有账号？<span onClick={() => router.push('/login')}>立即登录</span>
-        </div>
       </div>
     </div>
   )
