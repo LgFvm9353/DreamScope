@@ -54,18 +54,20 @@ export default function RootLayout({ children }) {
             border={false}
             safeAreaInsetBottom={true}
           >
-            {routes.map((route, index) => {
-              const IconComponent = route.icon
-              return (
-                <TabbarItem 
-                  key={route.path}
-                  icon={<IconComponent />} 
-                  name={index}
-                >
-                  {route.name}
-                </TabbarItem>
-              )
-            })}
+            {routes
+              .filter(route => route.icon && !route.hideInNav) // 过滤掉没有图标或需要隐藏的路由
+              .map((route, index) => {
+                const IconComponent = route.icon
+                return (
+                  <TabbarItem 
+                    key={route.path}
+                    icon={<IconComponent />} 
+                    name={index}
+                  >
+                    {route.name}
+                  </TabbarItem>
+                )
+              })}
           </Tabbar>
         </div>
       </body>

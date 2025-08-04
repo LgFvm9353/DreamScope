@@ -2,12 +2,14 @@
 
 import { NavBar, Button, Card, Cell, CellGroup, PullRefresh, Skeleton, Toast } from 'react-vant'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'  // 添加这一行导入 useRouter
 import { getRouteByPath } from '@/config/routes'
 import styles from './page.module.css'
 import { useState, useEffect } from 'react'
 import useDreamStore from '@/store/useDreamStore'
 
 export default function HomePage() {
+  const router = useRouter()  // 添加这一行初始化 router
   const [currentTime, setCurrentTime] = useState('')
   const [greeting, setGreeting] = useState('')
   const [isLoading, setIsLoading] = useState(true)
@@ -105,7 +107,7 @@ export default function HomePage() {
   // 处理梦境点击
   const handleDreamClick = (dream) => {
     console.log('查看梦境详情:', dream)
-    // 这里可以跳转到梦境详情页面
+    router.push(`/dream/${dream.id}`)
   }
 
   // 骨架屏组件

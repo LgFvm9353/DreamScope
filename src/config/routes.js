@@ -12,28 +12,36 @@ export const routes = [
     name: '首页',
     icon: HomeO,
     title: 'DreamJournal',
-    component: () => import('@/app/page')
+    component: () => import('@/app/page').then(mod => mod.default)
   },
   {
     path: '/record',
     name: '记录',
     icon: Edit,
     title: '记录梦境',
-    component: () => import('@/app/record/page')
+    component: () => import('@/app/record/page').then(mod => mod.default)
   },
   {
     path: '/analysis',
     name: '分析',
     icon: ChartTrendingO,
     title: 'AI分析',
-    component: () => import('@/app/analysis/page')
+    component: () => import('@/app/analysis/page').then(mod => mod.default)
   },
   {
     path: '/profile',
     name: '我的',
     icon: UserO,
     title: '我的',
-    component: () => import('@/app/profile/page')
+    component: () => import('@/app/profile/page').then(mod => mod.default)
+  },
+  // 添加梦境详情页路由（不在导航栏显示）
+  {
+    path: '/dream/[id]',
+    name: '梦境详情',
+    title: '梦境详情',
+    component: () => import('@/components/DynamicDreamPage').then(mod => mod.default),
+    hideInNav: true
   }
 ]
 
@@ -50,4 +58,4 @@ export const getRouteIndex = (path) => {
 // 懒加载组件
 export const lazyLoadComponent = (importFunc) => {
   return importFunc().then(module => module.default)
-} 
+}
