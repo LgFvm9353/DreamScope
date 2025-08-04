@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Button, Input, Loading, Empty } from 'react-vant'
 import { useRouter } from 'next/navigation'
-import useChatStore from '@/store/chatStore'
+import useChatStore from '@/store/useChatStore'
 import styles from './page.module.css'
 import {
   ChatO,

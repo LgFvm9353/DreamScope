@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { dreamAPI, userAPI } from '@/services/api';
+import { dreamAPI } from '@/services/api';
 
 const useDreamStore = create(
   persist(
@@ -22,9 +22,6 @@ const useDreamStore = create(
       
       // 草稿数据
       draft: null,
-      
-      // 用户信息
-      user: null,
       
       // 梦境列表
       dreams: [],
@@ -187,70 +184,17 @@ const useDreamStore = create(
           console.error('分析梦境失败:', error);
           throw error;
         }
-      },
-      
-      // 用户登录
-      login: async (credentials) => {
-        try {
-          const result = await userAPI.login(credentials);
-          localStorage.setItem('jwt_token', result.token);
-          set({ user: result.user });
-          return result;
-        } catch (error) {
-          console.error('登录失败:', error);
-          throw error;
-        }
-      },
-      
-      // 用户注册
-      register: async (userData) => {
-        try {
-          const result = await userAPI.register(userData);
-          localStorage.setItem('jwt_token', result.token);
-          set({ user: result.user });
-          return result;
-        } catch (error) {
-          console.error('注册失败:', error);
-          throw error;
-        }
-      },
-      
-      // 获取用户信息
-      getUser: async () => {
-        try {
-          const user = await userAPI.getUser();
-          set({ user });
-          return user;
-        } catch (error) {
-          console.error('获取用户信息失败:', error);
-          throw error;
-        }
-      },
-      
-      // 设置用户信息
-      setUser: (user) => {
-        set({ user });
-      },
-      
-      // 登出
-      logout: () => {
-        localStorage.removeItem('jwt_token');
-        set({ 
-          user: null, 
-          dreams: [],
-          dreamData: { content: '', emotion: '', type: '', tags: [], timestamp: null } 
-        });
-      },
+      }
+     
     }),
     {
       name: 'dream-store',
       partialize: (state) => ({
         draft: state.draft,
         saveOption: state.saveOption,
-        user: state.user,
       }),
     }
   )
 );
 
-export default useDreamStore; 
+export default useDreamStore;

@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useRef } from 'react';
-import useDreamStore from '@/store/dreamStore';
+import useDreamStore from '@/store/useDreamStore';
 
 export const useDreamRecord = () => {
   const {

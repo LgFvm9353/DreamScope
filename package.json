@@ -11,17 +11,23 @@
   "dependencies": {
     "@react-vant/icons": "^0.1.0",
     "axios": "^1.11.0",
+    "bcryptjs": "^3.0.2",
     "dayjs": "^1.11.13",
+    "dotenv": "^17.2.1",
     "echarts": "^5.4.0",
     "echarts-for-react": "^3.0.2",
     "framer-motion": "^12.23.12",
+    "jsonwebtoken": "^9.0.2",
     "jwt": "^0.2.0",
     "lib-flexible": "^0.3.2",
+    "mysql2": "^3.14.3",
     "next": "15.4.5",
+    "pg-hstore": "^2.3.4",
     "postcss-px-to-viewport": "^1.1.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-vant": "^3.3.5",
+    "sequelize": "^6.37.7",
     "zustand": "^5.0.7"
   },
   "devDependencies": {

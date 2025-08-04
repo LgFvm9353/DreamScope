@@ -1,6 +1,6 @@
 .container {
   min-height: 100vh;
-  background-color: #ffffff;
+  background-color: #f7f8fa;
   color: #333;
   display: flex;
   flex-direction: column;
@@ -9,20 +9,23 @@
 .content {
   flex: 1;
   padding: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
 }
 
-/* 用户卡片样式 */
-.userCard {
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  padding: 20px 16px;
+/* 用户信息区域 - 替换原来的userCard */
+.userInfoSection {
   margin: 16px 0;
-  border: 1px solid #f0f0f0;
 }
 
 .userInfo {
   display: flex;
   align-items: center;
+  padding: 16px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .avatarWrapper {
@@ -67,10 +70,10 @@
 }
 
 .menuList {
-  background-color: #f9f9f9;
+  background-color: #ffffff;
   border-radius: 8px;
   overflow: hidden;
-  border: 1px solid #f0f0f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .menuItem {
@@ -78,7 +81,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f5f5f5;
 }
 
 .menuItem:last-child {
@@ -138,4 +141,17 @@
   color: #333;
   margin-top: 8px;
   background-color: #fff;
+}
+
+/* 注册链接样式 */
+.registerLink {
+  text-align: center;
+  margin: 16px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.registerLink span {
+  color: #1989fa;
+  cursor: pointer;
 }

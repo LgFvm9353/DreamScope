@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { getRouteByPath } from '@/config/routes'
 import styles from './page.module.css'
 import { useState, useEffect } from 'react'
-import useDreamStore from '@/store/dreamStore'
+import useDreamStore from '@/store/useDreamStore'
 
 export default function HomePage() {
   const [currentTime, setCurrentTime] = useState('')

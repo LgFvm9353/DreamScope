@@ -1,15 +1,18 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { Uploader, Toast, Image, Button } from 'react-vant'
-import useDreamStore from '@/store/dreamStore'
+import { Uploader, Image, Button, Dialog } from 'react-vant' // 移除 Toast
+import useUserStore from '@/store/useUserStore'
 import { uploadAPI } from '@/services/api'
 import { useRouter } from 'next/navigation'
+import LoginForm from '@/components/LoginForm'
+import LoginButton from '@/components/LoginButton'
 import styles from './profile.module.css'
 
 export default function ProfilePage() {
   const router = useRouter()
-  const { user, setUser, logout } = useDreamStore()
+  const { user, setUser, logout } = useUserStore()
   const [showActionSheet, setShowActionSheet] = useState(false)
+  const [showLoginForm, setShowLoginForm] = useState(false)
   const [avatar, setAvatar] = useState('https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg')
   
   useEffect(() => {
@@ -17,45 +20,37 @@ export default function ProfilePage() {
       setAvatar(user.avatar)
     }
   }, [user])
-  
+
   // 处理文件上传
   const handleAfterRead = async (file) => {
     try {
-      Toast.loading({
-        message: '上传中...',
-        forbidClick: true,
-        duration: 0
-      })
       
       const result = await uploadAPI.uploadImage(file.file)
       
       // 更新用户头像
       if (result.url) {
         const updatedUser = { ...user, avatar: result.url }
-        await useDreamStore.getState().userAPI.updateUser(updatedUser)
+        await uploadAPI.updateUser(updatedUser)
         setUser(updatedUser)
         setAvatar(result.url)
-        Toast.clear()
-        Toast.success('头像上传成功')
+       
       }
     } catch (error) {
       console.error('上传失败:', error)
-      Toast.clear()
-      Toast.fail('上传失败，请重试')
+     
     }
   }
-  
+
   // 处理AI生成头像
   const handleGenerateAvatar = () => {
     setShowActionSheet(false)
-    Toast('AI生成头像功能开发中...')
+  
   }
   
   // 处理退出登录
   const handleLogout = () => {
     logout()
-    Toast.success('退出登录成功')
-    router.push('/')
+    router.push('/profile')
   }
   
   // 处理上传头像
@@ -63,32 +58,65 @@ export default function ProfilePage() {
     setShowActionSheet(false)
     document.getElementById('avatar-upload').click()
   }
-  
+
+  // 显示登录表单
+  const handleShowLoginForm = () => {
+    setShowLoginForm(true)
+  }
+
+  // 登录成功后的回调
+  const handleLoginSuccess = () => {
+    setShowLoginForm(false)
+  }
+
+  // 登录表单弹窗
+  const renderLoginDialog = () => {
+    return (
+      <Dialog
+        visible={showLoginForm}
+        title=""
+        showConfirmButton={false}
+        closeOnClickOverlay
+        onClose={() => setShowLoginForm(false)}
+        style={{ borderRadius: '12px', overflow: 'hidden' }}
+      >
+        <LoginForm onLoginSuccess={handleLoginSuccess} />
+        <div className={styles.registerLink}>
+          没有账号？<span onClick={() => router.push('/register')}>立即注册</span>
+        </div>
+      </Dialog>
+    )
+  }
+
   return (
     <div className={styles.container}>
-      
       <div className={styles.content}>
-        {/* 用户信息卡片 */}
-        <div className={styles.userCard}>
-          <div className={styles.userInfo}>
-            <div className={styles.avatarWrapper} onClick={() => setShowActionSheet(true)}>
-              <Image
-                width="80px"
-                height="80px"
-                fit="cover"
-                round
-                src={avatar}
-              />
-              <div className={styles.avatarOverlay}>点击更换</div>
-            </div>
-            <div className={styles.userDetails}>
-              <div className={styles.userItem}>昵称：{user?.username || '奶龙'}</div>
-              <div className={styles.userItem}>等级：{user?.level || '5级'}</div>
-              <div className={styles.userItem}>签名：{user?.signature || '保持热爱，奔赴山海。'}</div>
+        {/* 用户信息区域 */}
+        {user ? (
+          // 已登录用户显示个人信息
+          <div className={styles.userInfoSection}>
+            <div className={styles.userInfo}>
+              <div className={styles.avatarWrapper} onClick={() => setShowActionSheet(true)}>
+                <Image
+                  width="80px"
+                  height="80px"
+                  fit="cover"
+                  round
+                  src={avatar}
+                />
+                <div className={styles.avatarOverlay}>点击更换</div>
+              </div>
+              <div className={styles.userDetails}>
+                <div className={styles.userItem}>昵称：{user?.username || '奶龙'}</div>
+                <div className={styles.userItem}>等级：{user?.level || '5级'}</div>
+                <div className={styles.userItem}>签名：{user?.signature || '保持热爱，奔赴山海。'}</div>
+              </div>
             </div>
           </div>
-        </div>
-        
+        ) : (
+          // 未登录用户显示登录按钮
+          <LoginButton onClick={handleShowLoginForm} />
+        )}
         
         {/* 功能菜单列表 */}
         <div className={styles.menuList}>
@@ -110,10 +138,12 @@ export default function ProfilePage() {
           </div>
         </div>
         
-        {/* 退出登录按钮 */}
-        <div className={styles.logoutButton}>
-          <Button block color="#ff6b6b" onClick={handleLogout}>退出登录</Button>
-        </div>
+        {/* 退出登录按钮 - 仅登录用户显示 */}
+        {user && (
+          <div className={styles.logoutButton}>
+            <Button block color="#ff6b6b" onClick={handleLogout}>退出登录</Button>
+          </div>
+        )}
       </div>
       
       {/* 隐藏的文件上传组件 */}
@@ -135,6 +165,9 @@ export default function ProfilePage() {
           </div>
         </div>
       )}
+      
+      {/* 登录表单弹窗 */}
+      {renderLoginDialog()}
     </div>
   )
 }

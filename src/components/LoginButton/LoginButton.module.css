@@ -1,0 +1,33 @@
+.loginButtonContainer {
+  margin: 20px 0;
+  cursor: pointer;
+}
+
+.loginButton {
+  display: flex;
+  align-items: center;
+  padding: 18px 24px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.avatarContainer {
+  margin-right: 16px;
+}
+
+.loginText {
+  flex: 1;
+}
+
+.loginTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 6px;
+}
+
+.loginDesc {
+  font-size: 14px;
+  color: #999;
+}
