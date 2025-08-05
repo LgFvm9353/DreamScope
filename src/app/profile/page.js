@@ -1,8 +1,9 @@
 'use client'
-import { useState, useEffect } from 'react'
-import { Uploader, Image, Button, Dialog } from 'react-vant' // 移除 Toast
+import { useState, useEffect, useRef } from 'react'
+import { Uploader, Image, Button, Dialog } from 'react-vant'
 import useUserStore from '@/store/useUserStore'
 import { uploadAPI } from '@/services/api'
+import { cozeWorkflowAPI } from '@/services/cozeApi'
 import { useRouter } from 'next/navigation'
 import LoginForm from '@/components/LoginForm'
 import LoginButton from '@/components/LoginButton'
@@ -14,6 +15,11 @@ export default function ProfilePage() {
   const [showActionSheet, setShowActionSheet] = useState(false)
   const [showLoginForm, setShowLoginForm] = useState(false)
   const [avatar, setAvatar] = useState('https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg')
+  const [loading, setLoading] = useState(false)
+  const [loadingMessage, setLoadingMessage] = useState('')
+  
+  // 使用 useRef 来引用上传组件
+  const uploaderRef = useRef(null)
   
   useEffect(() => {
     if (user?.avatar) {
@@ -24,7 +30,6 @@ export default function ProfilePage() {
   // 处理文件上传
   const handleAfterRead = async (file) => {
     try {
-      
       const result = await uploadAPI.uploadImage(file.file)
       
       // 更新用户头像
@@ -33,18 +38,37 @@ export default function ProfilePage() {
         await uploadAPI.updateUser(updatedUser)
         setUser(updatedUser)
         setAvatar(result.url)
-       
       }
     } catch (error) {
       console.error('上传失败:', error)
-     
     }
   }
 
   // 处理AI生成头像
-  const handleGenerateAvatar = () => {
+  const handleGenerateAvatar = async () => {
     setShowActionSheet(false)
-  
+    try {
+      setLoadingMessage('AI正在生成头像，请稍候...')
+      setLoading(true)
+      
+      const signature = user?.signature || '保持热爱，奔赴山海。'
+      const result = await cozeWorkflowAPI.generateAvatar(signature)
+      
+      setLoading(false)
+      
+      if (result && result.imageUrl) {
+        const updatedUser = { ...user, avatar: result.imageUrl }
+        await uploadAPI.updateUser(updatedUser)
+        setUser(updatedUser)
+        setAvatar(result.imageUrl)
+        
+      } else {
+        throw new Error('未获取到头像URL')
+      }
+    } catch (error) {
+      console.error('AI生成头像失败:', error)
+      setLoading(false)
+    }
   }
   
   // 处理退出登录
@@ -53,10 +77,16 @@ export default function ProfilePage() {
     router.push('/profile')
   }
   
-  // 处理上传头像
+  // 处理上传头像 - 使用 ref 触发
   const handleUploadAvatar = () => {
     setShowActionSheet(false)
-    document.getElementById('avatar-upload').click()
+    // 使用 ref 来触发文件选择
+    if (uploaderRef.current) {
+      const input = uploaderRef.current.querySelector('input[type="file"]')
+      if (input) {
+        input.click()
+      }
+    }
   }
 
   // 显示登录表单
@@ -101,12 +131,26 @@ export default function ProfilePage() {
     )
   }
 
+  // 自定义加载状态组件
+  const renderLoading = () => {
+    if (!loading) return null
+    
+    return (
+      <div className={styles.loadingOverlay} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.loadingContent}>
+          <div className={styles.loadingSpinner}></div>
+          <div className={styles.loadingTitle}>AI生成头像</div>
+          <div className={styles.loadingMessage}>{loadingMessage}</div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className={styles.container}>
       <div className={styles.content}>
         {/* 用户信息区域 */}
         {user ? (
-          // 已登录用户显示个人信息
           <div className={styles.userInfoSection}>
             <div className={styles.userInfo}>
               <div className={styles.avatarWrapper} onClick={() => setShowActionSheet(true)}>
@@ -126,7 +170,6 @@ export default function ProfilePage() {
             </div>
           </div>
         ) : (
-          // 未登录用户显示登录按钮
           <LoginButton onClick={handleShowLoginForm} />
         )}
         
@@ -154,16 +197,16 @@ export default function ProfilePage() {
         )}
       </div>
       
-      {/* 隐藏的文件上传组件 */}
-      <Uploader
-        id="avatar-upload"
-        style={{ display: 'none' }}
-        maxCount={1}
-        afterRead={handleAfterRead}
-        accept="image/*"
-      />
+      {/* 隐藏的文件上传组件 - 使用 ref */}
+      <div ref={uploaderRef} style={{ display: 'none' }}>
+        <Uploader
+          maxCount={1}
+          afterRead={handleAfterRead}
+          accept="image/*"
+        />
+      </div>
       
-      {/* 自定义头像选择弹窗 - 上下排列 */}
+      {/* 自定义头像选择弹窗 */}
       {showActionSheet && (
         <div className={styles.customActionSheet} onClick={() => setShowActionSheet(false)}>
           <div className={styles.actionSheetContent} onClick={(e) => e.stopPropagation()}>
@@ -176,6 +219,9 @@ export default function ProfilePage() {
       
       {/* 登录表单弹窗 */}
       {renderLoginDialog()}
+      
+      {/* 自定义加载状态 */}
+      {renderLoading()}
     </div>
   )
 }
