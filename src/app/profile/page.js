@@ -82,8 +82,7 @@ export default function ProfilePage() {
 
   // 跳转到设置
   const handleSettingsClick = () => {
-    console.log('设置')
-    // TODO: 实现设置页面
+    router.push('/settings')
   }
 
   // 跳转到关于

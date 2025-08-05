@@ -1,8 +1,7 @@
+// 修改导入部分
 import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
-
-// 引用模拟数据库中的用户
-import { users } from '../register/route';
+import User from '@/models/User'; // 导入User模型
 
 // JWT密钥
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
@@ -23,8 +22,8 @@ export async function GET(request) {
     // 验证令牌
     const decoded = jwt.verify(token, JWT_SECRET);
     
-    // 查找用户
-    const user = users.find(user => user.id === decoded.id);
+    // 查找用户 - 使用Sequelize模型
+    const user = await User.findByPk(decoded.id);
     if (!user) {
       return NextResponse.json(
         { message: '用户不存在' },
@@ -33,7 +32,7 @@ export async function GET(request) {
     }
 
     // 返回用户信息（不包含密码）
-    const userResponse = { ...user };
+    const userResponse = user.toJSON();
     delete userResponse.password;
 
     return NextResponse.json(userResponse);
@@ -80,9 +79,9 @@ export async function PUT(request) {
     // 获取请求体
     const body = await request.json();
     
-    // 查找并更新用户
-    const userIndex = users.findIndex(user => user.id === decoded.id);
-    if (userIndex === -1) {
+    // 查找用户 - 使用Sequelize模型
+    const user = await User.findByPk(decoded.id);
+    if (!user) {
       return NextResponse.json(
         { message: '用户不存在' },
         { status: 404 }
@@ -91,10 +90,10 @@ export async function PUT(request) {
     
     // 更新用户信息（不允许更新密码）
     const { password, ...updateData } = body;
-    users[userIndex] = { ...users[userIndex], ...updateData };
+    await user.update(updateData);
     
     // 返回更新后的用户信息（不包含密码）
-    const userResponse = { ...users[userIndex] };
+    const userResponse = user.toJSON();
     delete userResponse.password;
     
     return NextResponse.json({

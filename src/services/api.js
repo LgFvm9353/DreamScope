@@ -89,6 +89,9 @@ export const userAPI = {
   // 更新用户信息
   updateUser: (data) => api.put('/auth/user', data),
   
+  // 更新密码
+  updatePassword: (data) => api.post('/auth/password', data),
+  
   // 登出
   logout: () => api.post('/auth/logout'),
 };
