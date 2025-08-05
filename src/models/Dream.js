@@ -33,8 +33,16 @@ const Dream = sequelize.define('Dream', {
     allowNull: false,
   },
   tags: {
-    type: DataTypes.JSON,
-    defaultValue: [],
+    type: DataTypes.TEXT, // 改为TEXT类型，存储逗号分隔的字符串
+    defaultValue: '',
+  },
+  image: {
+    type: DataTypes.STRING, // 存储图片URL
+    allowNull: true,
+  },
+  isFavorite: {
+    type: DataTypes.BOOLEAN, // 收藏状态
+    defaultValue: false,
   },
   analysisStatus: {
     type: DataTypes.ENUM('pending', 'completed', 'failed', 'skipped'),

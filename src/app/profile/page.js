@@ -69,6 +69,29 @@ export default function ProfilePage() {
     setShowLoginForm(false)
   }
 
+  // 跳转到梦境库
+  const handleLibraryClick = () => {
+    router.push('/library')
+  }
+
+  // 跳转到统计分析
+  const handleStatsClick = () => {
+    console.log('统计分析')
+    // TODO: 实现统计分析页面
+  }
+
+  // 跳转到设置
+  const handleSettingsClick = () => {
+    console.log('设置')
+    // TODO: 实现设置页面
+  }
+
+  // 跳转到关于
+  const handleAboutClick = () => {
+    console.log('关于')
+    // TODO: 实现关于页面
+  }
+
   // 登录表单弹窗
   const renderLoginDialog = () => {
     return (
@@ -116,19 +139,19 @@ export default function ProfilePage() {
         
         {/* 功能菜单列表 */}
         <div className={styles.menuList}>
-          <div className={styles.menuItem} onClick={() => console.log('梦境库')}>
+          <div className={styles.menuItem} onClick={handleLibraryClick}>
             <div className={styles.menuText}>梦境库</div>
             <div className={styles.menuArrow}>›</div>
           </div>
-          <div className={styles.menuItem} onClick={() => console.log('统计分析')}>
+          <div className={styles.menuItem} onClick={handleStatsClick}>
             <div className={styles.menuText}>统计分析</div>
             <div className={styles.menuArrow}>›</div>
           </div>
-          <div className={styles.menuItem} onClick={() => console.log('设置')}>
+          <div className={styles.menuItem} onClick={handleSettingsClick}>
             <div className={styles.menuText}>设置</div>
             <div className={styles.menuArrow}>›</div>
           </div>
-          <div className={styles.menuItem} onClick={() => console.log('关于')}>
+          <div className={styles.menuItem} onClick={handleAboutClick}>
             <div className={styles.menuText}>关于</div>
             <div className={styles.menuArrow}>›</div>
           </div>

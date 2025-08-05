@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { dreamAPI } from '@/services/api';
 import { EMOTION_OPTIONS, DREAM_TYPE_OPTIONS } from '@/config/dreamConfig';
@@ -14,27 +14,44 @@ const DreamDetailPage = () => {
   const [error, setError] = useState(null);
 
   // 获取梦境详情
-  useEffect(() => {
-    const fetchDreamDetail = async () => {
-      if (!params.id) return;
-      
-      setLoading(true);
-      setError(null);
-      
-      try {
-        const dreamData = await dreamAPI.getDream(params.id);
-        setDream(dreamData);
-      } catch (error) {
-        console.error('获取梦境详情失败:', error);
-        setError('获取梦境详情失败，请返回重试');
-        showToast('获取梦境详情失败', 'error');
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchDreamDetail = useCallback(async () => {
+    if (!params.id) return;
     
-    fetchDreamDetail();
+    setLoading(true);
+    setError(null);
+    
+    try {
+      console.log('Fetching dream detail for ID:', params.id);
+      const response = await dreamAPI.getDream(params.id);
+      console.log('Dream detail response:', response);
+      
+      if (response && response.success) {
+        // 处理新的API响应格式
+        setDream(response.data);
+      } else if (response) {
+        // 处理旧的API响应格式（直接返回梦境数据）
+        setDream(response);
+      } else {
+        setError('获取梦境详情失败');
+        showToast('获取梦境详情失败', 'error');
+      }
+    } catch (error) {
+      console.error('获取梦境详情失败:', error);
+      if (error.code === 'ECONNABORTED') {
+        setError('请求超时，请检查网络连接');
+      } else {
+        setError('获取梦境详情失败，请返回重试');
+      }
+      showToast('获取梦境详情失败', 'error');
+    } finally {
+      setLoading(false);
+    }
   }, [params.id]);
+  
+  // 初始加载时获取梦境详情
+  useEffect(() => {
+    fetchDreamDetail();
+  }, [fetchDreamDetail]);
 
   // 简单的Toast提示函数
   const showToast = (message, type = 'info') => {

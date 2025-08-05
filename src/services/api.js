@@ -51,6 +51,28 @@ export const dreamAPI = {
   
   // 分析梦境
   analyzeDream: (id) => api.post(`/dreams/${id}/analyze`),
+  
+  // 收藏/取消收藏梦境
+  toggleFavorite: (id) => api.post(`/dreams/${id}/favorite`),
+  
+  // 搜索梦境
+  searchDreams: (query, params = {}) => api.get('/dreams/search', { 
+    params: { q: query, ...params } 
+  }),
+  
+  // 按分类获取梦境
+  getDreamsByCategory: (category, params = {}) => api.get('/dreams/category', { 
+    params: { category, ...params } 
+  }),
+  
+  // 获取梦境统计
+  getDreamStats: () => api.get('/dreams/stats'),
+  
+  // 批量操作梦境
+  batchOperation: (operation, dreamIds) => api.post('/dreams/batch', {
+    operation,
+    dreamIds
+  }),
 };
 
 // 用户相关API
@@ -106,6 +128,9 @@ export const uploadAPI = {
       },
     });
   },
+  
+  // 更新用户信息（包含头像）
+  updateUser: (data) => api.put('/auth/user', data),
 };
 
-export default api; 
+export default api;

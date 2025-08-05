@@ -42,6 +42,14 @@ export const routes = [
     title: '梦境详情',
     component: () => import('@/components/DynamicDreamPage').then(mod => mod.default),
     hideInNav: true
+  },
+  // 添加梦境库路由（不在导航栏显示）
+  {
+    path: '/library',
+    name: '梦境库',
+    title: '梦境库',
+    component: () => import('@/app/library/page').then(mod => mod.default),
+    hideInNav: true
   }
 ]
 

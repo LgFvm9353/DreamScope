@@ -150,11 +150,16 @@ const useDreamStore = create(
       },
       
       // 获取用户梦境列表
-      getDreams: async () => {
+      getDreams: async (params = {}) => {
         try {
-          const dreams = await dreamAPI.getDreams();
-          set({ dreams });
-          return dreams;
+          const response = await dreamAPI.getDreams(params);
+          if (response && response.success) {
+            const dreams = response.data?.dreams || [];
+            set({ dreams });
+            return dreams;
+          } else {
+            throw new Error(response?.message || '获取梦境列表失败');
+          }
         } catch (error) {
           console.error('获取梦境列表失败:', error);
           throw error;

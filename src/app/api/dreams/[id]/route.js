@@ -52,8 +52,24 @@ export async function GET(request, { params }) {
         { status: 404 }
       );
     }
+
+    // 格式化返回数据
+    const dreamData = dream.toJSON();
+    const formattedDream = {
+      id: dreamData.id,
+      title: dreamData.title || dreamData.content.substring(0, 20) + '...',
+      content: dreamData.content,
+      date: new Date(dreamData.createdAt).toLocaleDateString('zh-CN'),
+      emotion: dreamData.emotion,
+      type: dreamData.type,
+      tags: dreamData.tags ? dreamData.tags.split(',').filter(tag => tag.trim()) : [],
+      isFavorite: dreamData.isFavorite || false,
+      image: dreamData.image,
+      analysisStatus: dreamData.analysisStatus,
+      createdAt: dreamData.createdAt
+    };
     
-    return NextResponse.json(dream);
+    return NextResponse.json(formattedDream);
   } catch (error) {
     console.error('获取梦境详情失败:', error);
     return NextResponse.json(
