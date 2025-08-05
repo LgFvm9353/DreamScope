@@ -74,12 +74,6 @@ export default function ProfilePage() {
     router.push('/library')
   }
 
-  // 跳转到统计分析
-  const handleStatsClick = () => {
-    console.log('统计分析')
-    // TODO: 实现统计分析页面
-  }
-
   // 跳转到设置
   const handleSettingsClick = () => {
     router.push('/settings')
@@ -140,10 +134,6 @@ export default function ProfilePage() {
         <div className={styles.menuList}>
           <div className={styles.menuItem} onClick={handleLibraryClick}>
             <div className={styles.menuText}>梦境库</div>
-            <div className={styles.menuArrow}>›</div>
-          </div>
-          <div className={styles.menuItem} onClick={handleStatsClick}>
-            <div className={styles.menuText}>统计分析</div>
             <div className={styles.menuArrow}>›</div>
           </div>
           <div className={styles.menuItem} onClick={handleSettingsClick}>

@@ -2,7 +2,8 @@ import {
     HomeO, 
     Edit, 
     ChartTrendingO, 
-    UserO 
+    UserO,
+    BarChartO
 } from '@react-vant/icons'
 
 // 路由配置
@@ -27,6 +28,13 @@ export const routes = [
     icon: ChartTrendingO,
     title: 'AI分析',
     component: () => import('@/app/analysis/page').then(mod => mod.default)
+  },
+  {
+    path: '/statistics',
+    name: '统计',
+    icon: BarChartO,
+    title: '梦境统计',
+    component: () => import('@/app/statistics/page').then(mod => mod.default)
   },
   {
     path: '/profile',
