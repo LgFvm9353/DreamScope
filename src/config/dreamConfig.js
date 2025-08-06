@@ -34,31 +34,6 @@ export const COMMON_TAGS = [
   '超能力', '时间', '空间', '颜色', '声音', '味道', '触感'
 ];
 
-// 保存选项
-export const SAVE_OPTIONS = [
-  {
-    id: 'save_only',
-    label: '仅保存记录',
-    description: '只保存梦境内容，不进行AI分析',
-    icon: '💾',
-    color: '#52c41a'
-  },
-  {
-    id: 'save_and_analyze',
-    label: '保存并立即分析',
-    description: '保存后立即进行AI分析',
-    icon: '🤖',
-    color: '#1890ff'
-  },
-  {
-    id: 'save_later',
-    label: '保存后稍后分析',
-    description: '保存后稍后进行AI分析',
-    icon: '⏰',
-    color: '#fa8c16'
-  }
-];
-
 // 表单验证规则
 export const VALIDATION_RULES = {
   content: {
@@ -93,6 +68,5 @@ export const TEXT_HINTS = {
   contentPlaceholder: '请详细描述您的梦境内容...',
   emotionHint: '选择梦境中主要的情绪感受',
   typeHint: '选择最符合的梦境类型',
-  tagsHint: '添加相关标签，帮助更好地理解梦境',
-  saveHint: '选择保存方式，决定是否进行AI分析'
-}; 
+  tagsHint: '添加相关标签，帮助更好地理解梦境'
+};

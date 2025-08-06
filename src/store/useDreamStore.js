@@ -14,9 +14,6 @@ const useDreamStore = create(
         timestamp: null,
       },
       
-      // 保存选项
-      saveOption: 'save_only',
-      
       // 加载状态
       loading: false,
       
@@ -68,11 +65,6 @@ const useDreamStore = create(
         }));
       },
       
-      // 更新保存选项
-      updateSaveOption: (option) => {
-        set({ saveOption: option });
-      },
-      
       // 保存草稿
       saveDraft: () => {
         const { dreamData } = get();
@@ -116,7 +108,7 @@ const useDreamStore = create(
       
       // 保存梦境记录
       saveDream: async () => {
-        const { dreamData, saveOption } = get();
+        const { dreamData } = get();
         
         if (!dreamData.content.trim()) {
           throw new Error('梦境内容不能为空');
@@ -128,7 +120,7 @@ const useDreamStore = create(
           const dreamRecord = {
             ...dreamData,
             createdAt: new Date().toISOString(),
-            analysisStatus: saveOption === 'save_only' ? 'skipped' : 'pending',
+            analysisStatus: 'pending',
           };
           
           // 调用API保存梦境
@@ -196,7 +188,6 @@ const useDreamStore = create(
       name: 'dream-store',
       partialize: (state) => ({
         draft: state.draft,
-        saveOption: state.saveOption,
       }),
     }
   )

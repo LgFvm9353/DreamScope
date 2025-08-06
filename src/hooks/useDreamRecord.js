@@ -4,14 +4,12 @@ import useDreamStore from '@/store/useDreamStore';
 export const useDreamRecord = () => {
   const {
     dreamData,
-    saveOption,
     loading,
     draft,
     updateDreamContent,
     updateEmotion,
     updateType,
     updateTags,
-    updateSaveOption,
     saveDraft,
     loadDraft,
     clearDraft,
@@ -55,11 +53,6 @@ export const useDreamRecord = () => {
   const handleTagsChange = useCallback((tags) => {
     updateTags(tags);
   }, [updateTags]);
-
-  // 处理保存选项变化
-  const handleSaveOptionChange = useCallback((option) => {
-    updateSaveOption(option);
-  }, [updateSaveOption]);
 
   // 验证表单
   const validateForm = useCallback(() => {
@@ -125,7 +118,6 @@ export const useDreamRecord = () => {
   return {
     // 数据
     dreamData,
-    saveOption,
     loading,
     hasDraft,
     isEmpty,
@@ -135,7 +127,6 @@ export const useDreamRecord = () => {
     handleEmotionChange,
     handleTypeChange,
     handleTagsChange,
-    handleSaveOptionChange,
     handleSave,
     handleLoadDraft,
     handleClearDraft,
@@ -143,4 +134,4 @@ export const useDreamRecord = () => {
     // 验证
     validateForm,
   };
-}; 
+};

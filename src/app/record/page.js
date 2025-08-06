@@ -7,12 +7,10 @@ import {
   Button, 
   Field, 
   CellGroup, 
-  Toast,
-  DropdownMenu
 } from 'react-vant';
 import { ArrowLeft, Checked } from '@react-vant/icons';
 import { useDreamRecord } from '@/hooks/useDreamRecord';
-import { EMOTION_OPTIONS, DREAM_TYPE_OPTIONS, SAVE_OPTIONS } from '@/config/dreamConfig';
+import { EMOTION_OPTIONS, DREAM_TYPE_OPTIONS } from '@/config/dreamConfig';
 import styles from './page.module.css';
 import useTitle from '@/hooks/useTitle';
 
@@ -22,7 +20,6 @@ const RecordPage = () => {
   
   const {
     dreamData,
-    saveOption,
     loading,
     hasDraft,
     isEmpty,
@@ -30,7 +27,6 @@ const RecordPage = () => {
     handleEmotionChange,
     handleTypeChange,
     handleTagsChange,
-    handleSaveOptionChange,
     handleSave,
     handleLoadDraft,
     handleClearDraft,
@@ -50,15 +46,9 @@ const RecordPage = () => {
   const handleSaveClick = async () => {
     try {
       await handleSave();
-      Toast.success('保存成功');
-      
-      if (saveOption === 'save_and_analyze') {
-        router.push('/analysis');
-      } else {
-        router.push('/');
-      }
+      router.push('/');
     } catch (error) {
-      Toast.fail(error.message || '保存失败');
+      console.log(error.message || '保存失败');
     }
   };
 
@@ -201,25 +191,6 @@ const RecordPage = () => {
               onPressEnter={handleTagInputConfirm}
               className={styles.tagInput}
             />
-          </div>
-        </CellGroup>
-
-        {/* 保存选项 - 简化实现 */}
-        <CellGroup title="保存方式">
-          <div className={styles.saveOptions}>
-            {SAVE_OPTIONS.map((option) => (
-              <div
-                key={option.id}
-                className={`${styles.saveOption} ${saveOption === option.id ? styles.selected : ''}`}
-                onClick={() => handleSaveOptionChange(option.id)}
-              >
-                <span className={styles.optionIcon}>{option.icon}</span>
-                <div className={styles.optionText}>
-                  <div className={styles.optionLabel}>{option.label}</div>
-                  <div className={styles.optionDesc}>{option.description}</div>
-                </div>
-              </div>
-            ))}
           </div>
         </CellGroup>
 

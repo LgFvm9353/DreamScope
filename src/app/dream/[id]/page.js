@@ -99,20 +99,20 @@ const DreamDetailPage = () => {
     router.back();
   };
 
-  // 分析梦境
-  const handleAnalyze = async () => {
-    if (!dream) return;
+  // // 分析梦境
+  // const handleAnalyze = async () => {
+  //   if (!dream) return;
     
-    try {
-      showToast('正在分析...', 'info');
-      await dreamAPI.analyzeDream(dream.id);
-      showToast('分析完成', 'success');
-      router.push('/analysis');
-    } catch (error) {
-      console.error('分析失败:', error);
-      showToast('分析失败，请重试', 'error');
-    }
-  };
+  //   try {
+  //     showToast('正在分析...', 'info');
+  //     await dreamAPI.analyzeDream(dream.id);
+  //     showToast('分析完成', 'success');
+  //     router.push('/analysis');
+  //   } catch (error) {
+  //     console.error('分析失败:', error);
+  //     showToast('分析失败，请重试', 'error');
+  //   }
+  // };
 
   // 加载状态
   if (loading) {
@@ -222,14 +222,14 @@ const DreamDetailPage = () => {
         </div>
 
         {/* 操作按钮 */}
-        <div className={styles.actions}>
+        {/* <div className={styles.actions}>
           <button 
             onClick={handleAnalyze}
             className={styles.analyzeButton}
           >
             🤖 AI分析梦境
           </button>
-        </div>
+        </div> */}
       </div>
     </div>
   );

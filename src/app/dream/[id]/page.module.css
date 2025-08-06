@@ -228,7 +228,7 @@
   font-weight: 500;
 }
 
-.actions {
+/* .actions {
   margin-top: auto;
   padding-bottom: 1.5rem;
 }
@@ -254,7 +254,7 @@
 
 .analyzeButton:active {
   transform: translateY(0);
-}
+} */
 
 .primaryBtn {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
