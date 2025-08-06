@@ -11,11 +11,17 @@
   padding: 1rem;
   display: flex;
   align-items: center;
-  gap: 1rem;
+  justify-content: space-between;
   position: sticky;
   top: 0;
   z-index: 100;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.navLeft {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .backBtn {
@@ -37,6 +43,41 @@
   margin: 0;
   font-size: 1.2rem;
   font-weight: 600;
+}
+
+.navActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.editBtn, .saveBtn, .cancelBtn {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.editBtn:hover, .cancelBtn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.saveBtn {
+  background: rgba(76, 175, 80, 0.8);
+  border-color: rgba(76, 175, 80, 1);
+}
+
+.saveBtn:hover {
+  background: rgba(76, 175, 80, 1);
+}
+
+.saveBtn:disabled, .cancelBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .content {
@@ -164,16 +205,145 @@
   color: white;
 }
 
+/* 编辑相关样式 */
+.fieldLabel {
+  display: block;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.dreamContentSection {
+  margin-bottom: 1.5rem;
+}
+
+.contentTextarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  line-height: 1.6;
+  resize: vertical;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.contentTextarea:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
 .dreamContent {
   font-size: 1rem;
   line-height: 1.6;
   color: #333;
   white-space: pre-wrap;
-  margin-bottom: 1.5rem;
   padding: 1rem;
   background: #f8f9fa;
   border-radius: 8px;
   border-left: 4px solid #667eea;
+}
+
+.emotionSection, .typeSection, .tagsSection {
+  margin-bottom: 1.5rem;
+}
+
+.emotionOptions, .typeOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.emotionOption, .typeOption {
+  background: #f8f9fa;
+  border: 2px solid #e2e8f0;
+  color: #333;
+  padding: 0.5rem 1rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.emotionOption:hover, .typeOption:hover {
+  border-color: #667eea;
+  background: #f0f4ff;
+}
+
+.emotionOption.selected, .typeOption.selected {
+  background: #667eea;
+  border-color: #667eea;
+  color: white;
+}
+
+.tagsEdit {
+  margin-top: 0.5rem;
+}
+
+.tagsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.tag {
+  background: rgba(102, 126, 234, 0.1);
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  color: #667eea;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.editableTag {
+  background: rgba(102, 126, 234, 0.1);
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  color: #667eea;
+  padding: 0.25rem 0.5rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.removeTagBtn {
+  background: none;
+  border: none;
+  color: #667eea;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0;
+  margin-left: 0.25rem;
+}
+
+.removeTagBtn:hover {
+  color: #e53e3e;
+}
+
+.tagInput {
+  width: 100%;
+  padding: 0.5rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  transition: border-color 0.2s;
+}
+
+.tagInput:focus {
+  outline: none;
+  border-color: #667eea;
 }
 
 .dreamFooter {
@@ -200,61 +370,6 @@
   color: #333;
   font-weight: 500;
 }
-
-.dreamTags {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.tagsLabel {
-  color: #666;
-  font-size: 0.875rem;
-}
-
-.tagsList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.tag {
-  background: rgba(102, 126, 234, 0.1);
-  border: 1px solid rgba(102, 126, 234, 0.2);
-  color: #667eea;
-  padding: 0.25rem 0.75rem;
-  border-radius: 1rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
-/* .actions {
-  margin-top: auto;
-  padding-bottom: 1.5rem;
-}
-
-.analyzeButton {
-  width: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  padding: 1rem 2rem;
-  border-radius: 2rem;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.analyzeButton:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 30px rgba(102, 126, 234, 0.5);
-}
-
-.analyzeButton:active {
-  transform: translateY(0);
-} */
 
 .primaryBtn {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);

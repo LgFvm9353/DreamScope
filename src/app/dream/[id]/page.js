@@ -12,6 +12,16 @@ const DreamDetailPage = () => {
   const [dream, setDream] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  
+  // 编辑状态的表单数据
+  const [editForm, setEditForm] = useState({
+    content: '',
+    emotion: '',
+    type: '',
+    tags: []
+  });
 
   // 获取梦境详情
   const fetchDreamDetail = useCallback(async () => {
@@ -28,9 +38,21 @@ const DreamDetailPage = () => {
       if (response && response.success) {
         // 处理新的API响应格式
         setDream(response.data);
+        setEditForm({
+          content: response.data.content || '',
+          emotion: response.data.emotion || '',
+          type: response.data.type || '',
+          tags: response.data.tags || []
+        });
       } else if (response) {
         // 处理旧的API响应格式（直接返回梦境数据）
         setDream(response);
+        setEditForm({
+          content: response.content || '',
+          emotion: response.emotion || '',
+          type: response.type || '',
+          tags: response.tags || []
+        });
       } else {
         setError('获取梦境详情失败');
         showToast('获取梦境详情失败', 'error');
@@ -96,23 +118,103 @@ const DreamDetailPage = () => {
 
   // 返回首页
   const handleBack = () => {
-    router.back();
+    if (isEditing) {
+      if (window.confirm('编辑内容尚未保存，确定要离开吗？')) {
+        setIsEditing(false);
+        router.back();
+      }
+    } else {
+      router.back();
+    }
   };
 
-  // // 分析梦境
-  // const handleAnalyze = async () => {
-  //   if (!dream) return;
-    
-  //   try {
-  //     showToast('正在分析...', 'info');
-  //     await dreamAPI.analyzeDream(dream.id);
-  //     showToast('分析完成', 'success');
-  //     router.push('/analysis');
-  //   } catch (error) {
-  //     console.error('分析失败:', error);
-  //     showToast('分析失败，请重试', 'error');
-  //   }
-  // };
+  // 开始编辑
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+
+  // 取消编辑
+  const handleCancel = () => {
+    if (window.confirm('确定要取消编辑吗？未保存的更改将丢失。')) {
+      setIsEditing(false);
+      // 重置表单数据
+      setEditForm({
+        content: dream.content || '',
+        emotion: dream.emotion || '',
+        type: dream.type || '',
+        tags: dream.tags || []
+      });
+    }
+  };
+
+  // 保存编辑
+  const handleSave = async () => {
+    if (!editForm.content.trim()) {
+      showToast('梦境内容不能为空', 'error');
+      return;
+    }
+
+    if (!editForm.emotion) {
+      showToast('请选择情绪', 'error');
+      return;
+    }
+
+    if (!editForm.type) {
+      showToast('请选择梦境类型', 'error');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const updateData = {
+        content: editForm.content.trim(),
+        emotion: editForm.emotion,
+        type: editForm.type,
+        tags: editForm.tags.filter(tag => tag.trim()).join(',')
+      };
+
+      const response = await dreamAPI.updateDream(params.id, updateData);
+      
+      if (response && (response.success || response.id)) {
+        // 更新本地状态
+        const updatedDream = {
+          ...dream,
+          ...updateData,
+          tags: editForm.tags.filter(tag => tag.trim())
+        };
+        setDream(updatedDream);
+        setIsEditing(false);
+        showToast('保存成功', 'success');
+      } else {
+        showToast('保存失败，请重试', 'error');
+      }
+    } catch (error) {
+      console.error('保存失败:', error);
+      showToast('保存失败，请重试', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // 更新表单数据
+  const updateEditForm = (field, value) => {
+    setEditForm(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  // 添加标签
+  const addTag = (tag) => {
+    if (tag.trim() && !editForm.tags.includes(tag.trim())) {
+      updateEditForm('tags', [...editForm.tags, tag.trim()]);
+    }
+  };
+
+  // 删除标签
+  const removeTag = (index) => {
+    updateEditForm('tags', editForm.tags.filter((_, i) => i !== index));
+  };
 
   // 加载状态
   if (loading) {
@@ -161,8 +263,8 @@ const DreamDetailPage = () => {
   }
 
   // 获取情绪和类型信息
-  const emotionOption = getEmotionOption(dream.emotion);
-  const typeOption = getDreamTypeOption(dream.type);
+  const emotionOption = getEmotionOption(isEditing ? editForm.emotion : dream.emotion);
+  const typeOption = getDreamTypeOption(isEditing ? editForm.type : dream.type);
 
   return (
     <div className={styles.container}>
@@ -171,7 +273,33 @@ const DreamDetailPage = () => {
         <button onClick={handleBack} className={styles.backBtn}>
           ← 返回
         </button>
-        <h1 className={styles.title}>梦境详情</h1>
+        <h1 className={styles.title}>
+          {isEditing ? '编辑梦境' : '梦境详情'}
+        </h1>
+        <div className={styles.navActions}>
+          {isEditing ? (
+            <>
+              <button 
+                onClick={handleCancel} 
+                className={styles.cancelBtn}
+                disabled={saving}
+              >
+                取消
+              </button>
+              <button 
+                onClick={handleSave} 
+                className={styles.saveBtn}
+                disabled={saving}
+              >
+                {saving ? '保存中...' : '保存'}
+              </button>
+            </>
+          ) : (
+            <button onClick={handleEdit} className={styles.editBtn}>
+              ✏️ 编辑
+            </button>
+          )}
+        </div>
       </div>
 
       {/* 内容区域 */}
@@ -179,36 +307,114 @@ const DreamDetailPage = () => {
         <div className={styles.dreamCard}>
           {/* 梦境标题和元信息 */}
           <div className={styles.dreamHeader}>
-            <h2 className={styles.dreamTitle}>{dream.title}</h2>
+            <h2 className={styles.dreamTitle}>
+              {dream.title || '梦境记录'}
+            </h2>
             <div className={styles.dreamMeta}>
               <span className={styles.dreamDate}>
                 🕐 {dream.date}
               </span>
-              <span 
-                className={`${styles.dreamEmotion} ${styles[dream.emotion]}`}
-              >
-                {emotionOption.icon} {emotionOption.label}
-              </span>
+              {!isEditing && (
+                <span 
+                  className={`${styles.dreamEmotion} ${styles[dream.emotion]}`}
+                >
+                  {emotionOption.icon} {emotionOption.label}
+                </span>
+              )}
             </div>
           </div>
 
           {/* 梦境内容 */}
-          <div className={styles.dreamContent}>
-            {dream.content}
+          <div className={styles.dreamContentSection}>
+            <label className={styles.fieldLabel}>梦境内容：</label>
+            {isEditing ? (
+              <textarea
+                value={editForm.content}
+                onChange={(e) => updateEditForm('content', e.target.value)}
+                className={styles.contentTextarea}
+                placeholder="请描述你的梦境..."
+                rows={8}
+              />
+            ) : (
+              <div className={styles.dreamContent}>
+                {dream.content}
+              </div>
+            )}
           </div>
 
-          {/* 梦境类型和标签 */}
-          <div className={styles.dreamFooter}>
-            <div className={styles.dreamType}>
-              <span className={styles.typeLabel}>梦境类型：</span>
-              <span className={styles.typeValue}>
-                {typeOption.icon} {typeOption.label}
-              </span>
+          {/* 情绪选择 */}
+          {isEditing && (
+            <div className={styles.emotionSection}>
+              <label className={styles.fieldLabel}>情绪：</label>
+              <div className={styles.emotionOptions}>
+                {EMOTION_OPTIONS.map((emotion) => (
+                  <button
+                    key={emotion.value}
+                    onClick={() => updateEditForm('emotion', emotion.value)}
+                    className={`${styles.emotionOption} ${
+                      editForm.emotion === emotion.value ? styles.selected : ''
+                    }`}
+                  >
+                    {emotion.icon} {emotion.label}
+                  </button>
+                ))}
+              </div>
             </div>
-            
-            {dream.tags && dream.tags.length > 0 && (
-              <div className={styles.dreamTags}>
-                <span className={styles.tagsLabel}>🏷️ 标签：</span>
+          )}
+
+          {/* 梦境类型选择 */}
+          {isEditing && (
+            <div className={styles.typeSection}>
+              <label className={styles.fieldLabel}>梦境类型：</label>
+              <div className={styles.typeOptions}>
+                {DREAM_TYPE_OPTIONS.map((type) => (
+                  <button
+                    key={type.value}
+                    onClick={() => updateEditForm('type', type.value)}
+                    className={`${styles.typeOption} ${
+                      editForm.type === type.value ? styles.selected : ''
+                    }`}
+                  >
+                    {type.icon} {type.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 标签 */}
+          <div className={styles.tagsSection}>
+            <label className={styles.fieldLabel}>🏷️ 标签：</label>
+            {isEditing ? (
+              <div className={styles.tagsEdit}>
+                <div className={styles.tagsList}>
+                  {editForm.tags.map((tag, index) => (
+                    <span key={index} className={styles.editableTag}>
+                      {tag}
+                      <button
+                        onClick={() => removeTag(index)}
+                        className={styles.removeTagBtn}
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                <input
+                  type="text"
+                  placeholder="输入标签后按回车添加"
+                  className={styles.tagInput}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      addTag(e.target.value);
+                      e.target.value = '';
+                    }
+                  }}
+                />
+              </div>
+            ) : (
+              dream.tags && dream.tags.length > 0 && (
                 <div className={styles.tagsList}>
                   {dream.tags.map((tag, index) => (
                     <span key={index} className={styles.tag}>
@@ -216,20 +422,22 @@ const DreamDetailPage = () => {
                     </span>
                   ))}
                 </div>
-              </div>
+              )
             )}
           </div>
-        </div>
 
-        {/* 操作按钮 */}
-        {/* <div className={styles.actions}>
-          <button 
-            onClick={handleAnalyze}
-            className={styles.analyzeButton}
-          >
-            🤖 AI分析梦境
-          </button>
-        </div> */}
+          {/* 梦境类型显示（非编辑状态） */}
+          {!isEditing && (
+            <div className={styles.dreamFooter}>
+              <div className={styles.dreamType}>
+                <span className={styles.typeLabel}>梦境类型：</span>
+                <span className={styles.typeValue}>
+                  {typeOption.icon} {typeOption.label}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
