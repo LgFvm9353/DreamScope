@@ -37,8 +37,8 @@ const Dream = sequelize.define('Dream', {
     defaultValue: '',
   },
   image: {
-    type: DataTypes.STRING, // 存储图片URL
-    allowNull: true,
+    type: DataTypes.STRING, // 改为STRING类型，存储单张图片URL
+    defaultValue: null,
   },
   isFavorite: {
     type: DataTypes.BOOLEAN, // 收藏状态

@@ -81,7 +81,7 @@ export const GET = withAuth(async (request, { userId }) => {
         type: dreamData.type,
         tags: dreamData.tags ? dreamData.tags.split(',').filter(tag => tag.trim()) : [],
         isFavorite: dreamData.isFavorite || false,
-        image: dreamData.image,
+        image: dreamData.image, // 直接返回单张图片URL
         analysisStatus: dreamData.analysisStatus
       };
     });
@@ -134,7 +134,7 @@ export const POST = withAuth(async (request, { userId }) => {
       emotion: emotion || 'neutral',
       type: type || 'normal',
       tags: Array.isArray(tags) ? tags.join(',') : tags || '',
-      image: image || null,
+      image: image || null, // 直接存储单张图片URL
       isFavorite: false,
       analysisStatus: 'pending'
     });
@@ -150,7 +150,7 @@ export const POST = withAuth(async (request, { userId }) => {
         tags: dream.tags ? dream.tags.split(',').filter(tag => tag.trim()) : [],
         date: new Date(dream.createdAt).toLocaleDateString('zh-CN'),
         isFavorite: dream.isFavorite,
-        image: dream.image
+        image: dream.image // 直接返回单张图片URL
       }
     }, { status: 201 });
 

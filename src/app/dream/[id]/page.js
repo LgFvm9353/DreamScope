@@ -342,6 +342,27 @@ const DreamDetailPage = () => {
             )}
           </div>
 
+          {/* 梦境图片展示 */}
+          {dream.image && (
+            <div className={styles.dreamImageSection}>
+              <label className={styles.fieldLabel}>📷 梦境图片：</label>
+              <div className={styles.imageContainer}>
+                <img 
+                  src={dream.image} 
+                  alt="梦境图片" 
+                  className={styles.dreamImage}
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextElementSibling.style.display = 'block';
+                  }}
+                />
+                <div className={styles.imageError} style={{display: 'none'}}>
+                  <span>图片加载失败</span>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* 情绪选择 */}
           {isEditing && (
             <div className={styles.emotionSection}>

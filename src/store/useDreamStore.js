@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { dreamAPI } from '@/services/api';
+import { dreamAPI, uploadAPI } from '@/services/api'; 
 
 const useDreamStore = create(
   persist(
@@ -11,14 +11,12 @@ const useDreamStore = create(
         emotion: '',
         type: '',
         tags: [],
+        image: null, // 改为单张图片
         timestamp: null,
       },
       
       // 加载状态
       loading: false,
-      
-      // 草稿数据
-      draft: null,
       
       // 梦境列表
       dreams: [],
@@ -32,7 +30,6 @@ const useDreamStore = create(
             timestamp: Date.now(),
           },
         }));
-        get().saveDraft();
       },
       
       // 更新情绪
@@ -65,27 +62,14 @@ const useDreamStore = create(
         }));
       },
       
-      // 保存草稿
-      saveDraft: () => {
-        const { dreamData } = get();
-        if (dreamData.content.trim()) {
-          set({ draft: { ...dreamData, savedAt: Date.now() } });
-        }
-      },
-      
-      // 加载草稿
-      loadDraft: () => {
-        const { draft } = get();
-        if (draft) {
-          set({ dreamData: draft });
-          return true;
-        }
-        return false;
-      },
-      
-      // 清除草稿
-      clearDraft: () => {
-        set({ draft: null });
+      // 更新图片（单张）
+      updateImage: (image) => {
+        set((state) => ({
+          dreamData: {
+            ...state.dreamData,
+            image,
+          },
+        }));
       },
       
       // 重置梦境数据
@@ -96,6 +80,7 @@ const useDreamStore = create(
             emotion: '',
             type: '',
             tags: [],
+            image: null, // 重置时也要包含图片字段
             timestamp: null,
           },
         });
@@ -117,17 +102,29 @@ const useDreamStore = create(
         set({ loading: true });
         
         try {
+          // 先上传图片
+          let uploadedImageUrl = null;
+          if (dreamData.image && dreamData.image.file) {
+            try {
+              const uploadResult = await uploadAPI.uploadImage(dreamData.image.file);
+              if (uploadResult && uploadResult.success) {
+                uploadedImageUrl = uploadResult.url;
+              }
+            } catch (uploadError) {
+              console.error('图片上传失败:', uploadError);
+              // 继续保存，不中断整个保存流程
+            }
+          }
+          
           const dreamRecord = {
             ...dreamData,
+            image: uploadedImageUrl, // 使用上传后的图片URL
             createdAt: new Date().toISOString(),
             analysisStatus: 'pending',
           };
           
           // 调用API保存梦境
           const result = await dreamAPI.createDream(dreamRecord);
-          
-          // 清除草稿
-          get().clearDraft();
           
           // 重置数据
           get().resetDreamData();
@@ -186,9 +183,7 @@ const useDreamStore = create(
     }),
     {
       name: 'dream-store',
-      partialize: (state) => ({
-        draft: state.draft,
-      }),
+      partialize: () => ({}), // 不再持久化任何数据
     }
   )
 );

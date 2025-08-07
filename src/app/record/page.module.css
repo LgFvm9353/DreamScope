@@ -267,49 +267,6 @@
   .actions {
     padding: 0 8px;
   }
-} 
-
-/* 模态框样式 */
-.modalOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.modal {
-  background: white;
-  border-radius: 16px;
-  padding: 24px;
-  max-width: 400px;
-  width: 90%;
-  text-align: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-}
-
-.modal h3 {
-  margin: 0 0 12px 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: #333;
-}
-
-.modal p {
-  margin: 0 0 20px 0;
-  color: #666;
-  line-height: 1.5;
-}
-
-.modalButtons {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
 }
 
 /* 标签样式 */
@@ -344,60 +301,107 @@
   opacity: 0.8;
 }
 
-/* 保存选项样式 */
-.saveOptions {
+/* 单张图片上传样式 */
+.imageUploadWrapper {
+  padding: 12px 16px;
+}
+
+.uploadButton {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 12px 0;
-}
-
-.saveOption {
-  display: flex;
   align-items: center;
-  padding: 16px;
-  border: 2px solid #e8e8e8;
-  border-radius: 12px;
-  background: #fff;
+  justify-content: center;
+  width: 100px;
+  height: 100px;
+  border: 2px dashed #d9d9d9;
+  border-radius: 8px;
+  background: #fafafa;
+  color: #999;
   cursor: pointer;
   transition: all 0.2s ease;
+  user-select: none;
 }
 
-.saveOption:hover {
+.uploadButton:hover {
   border-color: var(--rv-primary-color);
-  background: rgba(var(--rv-primary-color), 0.05);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.saveOption.selected {
-  border-color: var(--rv-primary-color);
-  background: rgba(var(--rv-primary-color), 0.1);
-  box-shadow: 0 2px 8px rgba(var(--rv-primary-color), 0.3);
-}
-
-.optionIcon {
-  font-size: 20px;
-  margin-right: 12px;
-}
-
-.optionText {
-  flex: 1;
-}
-
-.optionLabel {
-  font-size: 14px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 4px;
-}
-
-.optionDesc {
-  font-size: 12px;
-  color: #666;
-  line-height: 1.4;
-}
-
-.saveOption.selected .optionLabel {
   color: var(--rv-primary-color);
+  background: rgba(var(--rv-primary-color), 0.05);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.uploadButton:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.uploadButton span {
+  font-size: 12px;
+  margin-top: 4px;
+  pointer-events: none;
+}
+
+.imagePreview {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.imageItem {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f5f5f5;
+  transition: transform 0.2s ease;
+}
+
+.imageItem:hover {
+  transform: scale(1.02);
+}
+
+.imageItem img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.deleteButton {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  line-height: 1;
+  transition: all 0.2s ease;
+  opacity: 0.8;
+}
+
+.deleteButton:hover {
+  background: rgba(255, 0, 0, 0.8);
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* 响应式优化 */
+@media (max-width: 480px) {
+  .uploadButton {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .imageItem {
+    width: 80px;
+    height: 80px;
+  }
 }

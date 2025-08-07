@@ -1,43 +1,24 @@
-import { useEffect, useCallback, useRef } from 'react';
+import { useCallback } from 'react';
 import useDreamStore from '@/store/useDreamStore';
 
 export const useDreamRecord = () => {
   const {
     dreamData,
     loading,
-    draft,
     updateDreamContent,
     updateEmotion,
     updateType,
     updateTags,
-    saveDraft,
-    loadDraft,
-    clearDraft,
+    updateImage, 
     resetDreamData,
     setLoading,
     saveDream,
   } = useDreamStore();
 
-  const autoSaveTimeoutRef = useRef(null);
-
-  // 自动保存功能
-  const autoSave = useCallback((content) => {
-    if (autoSaveTimeoutRef.current) {
-      clearTimeout(autoSaveTimeoutRef.current);
-    }
-
-    autoSaveTimeoutRef.current = setTimeout(() => {
-      if (content.trim()) {
-        saveDraft();
-      }
-    }, 2000); // 2秒后自动保存
-  }, [saveDraft]);
-
   // 处理内容变化
   const handleContentChange = useCallback((content) => {
     updateDreamContent(content);
-    autoSave(content);
-  }, [updateDreamContent, autoSave]);
+  }, [updateDreamContent]);
 
   // 处理情绪选择
   const handleEmotionChange = useCallback((emotion) => {
@@ -53,6 +34,11 @@ export const useDreamRecord = () => {
   const handleTagsChange = useCallback((tags) => {
     updateTags(tags);
   }, [updateTags]);
+
+  // 处理图片变化（单张）
+  const handleImageChange = useCallback((image) => {
+    updateImage(image);
+  }, [updateImage]);
 
   // 验证表单
   const validateForm = useCallback(() => {
@@ -89,37 +75,13 @@ export const useDreamRecord = () => {
     }
   }, [validateForm, saveDream]);
 
-  // 加载草稿
-  const handleLoadDraft = useCallback(() => {
-    return loadDraft();
-  }, [loadDraft]);
-
-  // 清除草稿
-  const handleClearDraft = useCallback(() => {
-    clearDraft();
-    resetDreamData();
-  }, [clearDraft, resetDreamData]);
-
-  // 检查是否有草稿
-  const hasDraft = draft !== null;
-
   // 检查内容是否为空
   const isEmpty = !dreamData.content.trim();
-
-  // 清理定时器
-  useEffect(() => {
-    return () => {
-      if (autoSaveTimeoutRef.current) {
-        clearTimeout(autoSaveTimeoutRef.current);
-      }
-    };
-  }, []);
 
   return {
     // 数据
     dreamData,
     loading,
-    hasDraft,
     isEmpty,
     
     // 事件处理
@@ -127,9 +89,8 @@ export const useDreamRecord = () => {
     handleEmotionChange,
     handleTypeChange,
     handleTagsChange,
+    handleImageChange, // 改为单张图片
     handleSave,
-    handleLoadDraft,
-    handleClearDraft,
     
     // 验证
     validateForm,

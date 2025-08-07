@@ -385,3 +385,47 @@
 .primaryBtn:hover {
   opacity: 0.9;
 }
+
+/* 梦境图片展示样式 */
+.dreamImageSection {
+  margin-bottom: 1.5rem;
+}
+
+.imageContainer {
+  margin-top: 0.5rem;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: #f8f9fa;
+  position: relative;
+}
+
+.dreamImage {
+  width: 100%;
+  height: auto;
+  max-height: 400px;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.dreamImage:hover {
+  transform: scale(1.02);
+}
+
+.imageError {
+  padding: 2rem;
+  text-align: center;
+  color: #666;
+  font-size: 0.875rem;
+  background: #f5f5f5;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .dreamImage {
+    max-height: 300px;
+  }
+}

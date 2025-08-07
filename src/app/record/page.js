@@ -1,14 +1,14 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef } from 'react'; 
 import { useRouter } from 'next/navigation';
 import { 
-  NavBar, 
   Button, 
   Field, 
   CellGroup, 
+  Toast, 
 } from 'react-vant';
-import { ArrowLeft, Checked } from '@react-vant/icons';
+import { PhotoO } from '@react-vant/icons';
 import { useDreamRecord } from '@/hooks/useDreamRecord';
 import { EMOTION_OPTIONS, DREAM_TYPE_OPTIONS } from '@/config/dreamConfig';
 import styles from './page.module.css';
@@ -16,31 +16,22 @@ import useTitle from '@/hooks/useTitle';
 
 const RecordPage = () => {
   const router = useRouter();
-  useTitle('梦境记录'); // 使用自定义hook设置页面标题
+  useTitle('梦境记录'); 
   
   const {
     dreamData,
     loading,
-    hasDraft,
     isEmpty,
     handleContentChange,
     handleEmotionChange,
     handleTypeChange,
     handleTagsChange,
+    handleImageChange, // 改为单张图片
     handleSave,
-    handleLoadDraft,
-    handleClearDraft,
   } = useDreamRecord();
 
-  const [showDraftDialog, setShowDraftDialog] = useState(false);
   const [tagInput, setTagInput] = useState('');
-
-  // 检查草稿
-  useEffect(() => {
-    if (hasDraft && isEmpty) {
-      setShowDraftDialog(true);
-    }
-  }, [hasDraft, isEmpty]);
+  const fileInputRef = useRef(null); // 添加文件输入引用
 
   // 处理保存点击
   const handleSaveClick = async () => {
@@ -70,51 +61,38 @@ const RecordPage = () => {
     handleTagsChange(newTags);
   };
 
-  // 草稿对话框
-  const showDraftDialogContent = () => (
-    showDraftDialog && (
-      <div className={styles.modalOverlay}>
-        <div className={styles.modal}>
-          <h3>发现草稿</h3>
-          <p>您有未完成的梦境记录，是否要恢复？</p>
-          <div className={styles.modalButtons}>
-            <Button 
-              type="primary" 
-              onClick={() => {
-                handleLoadDraft();
-                setShowDraftDialog(false);
-              }}
-            >
-              恢复草稿
-            </Button>
-            <Button 
-              onClick={() => {
-                handleClearDraft();
-                setShowDraftDialog(false);
-              }}
-            >
-              清除草稿
-            </Button>
-          </div>
-        </div>
-      </div>
-    )
-  );
+  // 处理图片上传（单张）
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0];
+    
+    if (!file) return;
+    
+    const newImage = {
+      id: Date.now(),
+      file: file,
+      url: URL.createObjectURL(file),
+      name: file.name,
+      size: file.size,
+    };
+    
+    handleImageChange(newImage);
+    
+    // 清空 input 值，允许重复选择同一文件
+    event.target.value = '';
+  };
+
+  // 点击上传按钮
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  // 删除图片
+  const handleImageDelete = () => {
+    handleImageChange(null);
+  };
 
   return (
     <div className={`${styles.container} scroll-container`}>
-      {/* 草稿对话框 */}
-      {showDraftDialogContent()}
-
-      {/* 导航栏 */}
-      {/* <NavBar
-        title="梦境记录"
-        leftArrow={<ArrowLeft />}
-        onClickLeft={() => router.back()}
-        fixed
-        placeholder
-      /> */}
-
       {/* 主要内容 */}
       <div className={styles.content}>
         {/* 梦境内容 */}
@@ -131,6 +109,43 @@ const RecordPage = () => {
             <div className={styles.charCount}>
               {dreamData.content.length}/2000
             </div>
+          </div>
+        </CellGroup>
+
+        {/* 图片上传（单张） */}
+        <CellGroup title="添加图片" description="上传与梦境相关的图片">
+          <div className={styles.imageUploadWrapper}>
+            {/* 隐藏的文件输入 */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              style={{ display: 'none' }}
+            />
+            
+            {/* 如果没有图片，显示上传按钮 */}
+            {!dreamData.image && (
+              <div className={styles.uploadButton} onClick={handleUploadClick}>
+                <PhotoO size={24} />
+                <span>添加图片</span>
+              </div>
+            )}
+            
+            {/* 已上传的图片预览 */}
+            {dreamData.image && (
+              <div className={styles.imagePreview}>
+                <div className={styles.imageItem}>
+                  <img src={dreamData.image.url} alt="梦境图片" />
+                  <button 
+                    className={styles.deleteButton}
+                    onClick={handleImageDelete}
+                  >
+                    ×
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </CellGroup>
 
