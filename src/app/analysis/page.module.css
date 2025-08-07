@@ -1,10 +1,66 @@
+/* 顶部导航栏 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background-color: var(--background);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.headerTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--foreground);
+  margin: 0;
+}
+
+.newChatButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.newChatButton:hover {
+  background-color: var(--primary-color-hover, #1976d2);
+  transform: scale(1.05);
+}
+
+.newChatButton:active {
+  transform: scale(0.95);
+}
+
 .chatContainer {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 130px); /* 调整高度，为底部标签栏和输入框预留更多空间 */
+  height: calc(100vh - 200px); /* 调整高度，为顶部导航栏、底部标签栏和输入框预留空间 */
   padding: 16px;
   padding-bottom: 0; /* 移除底部内边距，由输入框容器管理间距 */
   overflow-y: auto; /* 确保内容可滚动 */
+}
+
+/* 空状态容器 - 居中显示 */
+.emptyContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 300px;
+}
+
+.emptyState {
+  text-align: center;
 }
 
 .messageList {

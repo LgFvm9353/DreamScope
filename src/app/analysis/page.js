@@ -7,7 +7,8 @@ import styles from './page.module.css'
 import {
   ChatO,
   UserO,
-  Cross
+  Cross,
+  Plus
 }from '@react-vant/icons'
 
 // 自定义头像组件替代react-vant的Avatar
@@ -55,13 +56,38 @@ export default function AnalysisPage() {
   const handleClearInput = () => {
     setInputValue('')
   }
+
+  // 新增对话 - 清除所有消息
+  const handleNewChat = () => {
+    clearMessages()
+    setInputValue('')
+  }
   
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      {/* 顶部导航栏 */}
+      <div className={styles.header}>
+        <h1 className={styles.headerTitle}>AI 梦境分析</h1>
+        {messages.length > 0 && (
+          <button 
+            className={styles.newChatButton}
+            onClick={handleNewChat}
+            title="新增对话"
+          >
+            <Plus size={20} />
+          </button>
+        )}
+      </div>
+
       <div className={`${styles.chatContainer} scroll-container`}>
         {/* 移除 overflow-y-auto，已在CSS中设置 */}
         {messages.length === 0 ? (
-          <Empty description="开始与AI助手对话，分析你的梦境" />
+          <div className={styles.emptyContainer}>
+            <Empty 
+              description="开始与AI助手对话，分析你的梦境" 
+              className={styles.emptyState}
+            />
+          </div>
         ) : (
           <div className={styles.messageList}>
             {messages.map((message) => (
