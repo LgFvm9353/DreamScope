@@ -42,6 +42,33 @@
   border: 1px solid rgba(255, 255, 255, 0.8);
 }
 
+/* 卡片头部带按钮的布局 */
+.cardHeaderWithButton {
+  position: relative;
+  width: 100%;
+  padding-right: 220px; /* 为按钮预留空间 */
+}
+
+/* 更多按钮样式 */
+.moreButton {
+  position: absolute !important;
+  right: 0 !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  font-size: 0.875rem !important;
+  padding: 0.25rem 0.75rem !important;
+  height: auto !important;
+  min-height: auto !important;
+  z-index: 10 !important;
+}
+
+/* 强制覆盖Card Header的样式 */
+.dreamsCard :global(.rv-card__header) {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+
 /* 统计网格 */
 .statsGrid {
   display: flex;
@@ -85,34 +112,11 @@
   font-weight: 500;
 }
 
-/* 梦境情绪标签 */
-.dreamEmotion {
-  padding: 0.5rem 0.75rem;
-  border-radius: 1rem;
+/* 梦境情绪文字样式（移除背景和颜色） */
+.dreamEmotionText {
   font-size: 0.875rem;
-  font-weight: 600;
-  min-width: 3rem;
-  text-align: center;
-}
-
-.dreamEmotion.happy {
-  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-  color: white;
-}
-
-.dreamEmotion.calm {
-  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
-  color: white;
-}
-
-.dreamEmotion.sad {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-}
-
-.dreamEmotion.fear {
-  background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
-  color: white;
+  color: #666;
+  font-weight: 500;
 }
 
 .emptyText {
@@ -154,5 +158,10 @@
   
   .statLabel {
     font-size: 0.75rem;
+  }
+  
+  .moreButton {
+    font-size: 0.75rem !important;
+    padding: 0.2rem 0.5rem !important;
   }
 }

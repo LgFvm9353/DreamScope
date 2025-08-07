@@ -110,6 +110,11 @@ export default function HomePage() {
     router.push(`/dream/${dream.id}`)
   }
 
+  // 跳转到梦境库
+  const handleGoToLibrary = () => {
+    router.push('/library')
+  }
+
   // 骨架屏组件
   const DreamSkeleton = () => (
     <div className={styles.container}>
@@ -233,11 +238,24 @@ export default function HomePage() {
         
         {/* 最近梦境 */}
         <Card round className={styles.dreamsCard}>
-          <Card.Header>最近梦境</Card.Header>
+          <Card.Header>
+            <div className={styles.cardHeaderWithButton}>
+              <span>最近梦境</span>
+              <Button 
+                size="small" 
+                type="primary" 
+                plain
+                onClick={handleGoToLibrary}
+                className={styles.moreButton}
+              >
+                更多
+              </Button>
+            </div>
+          </Card.Header>
           <Card.Body>
             {dreams.length > 0 ? (
               <CellGroup>
-                {dreams.map(dream => (
+                {dreams.slice(0, 5).map(dream => (
                   <Cell 
                     key={dream.id} 
                     title={dream.title}
@@ -245,9 +263,9 @@ export default function HomePage() {
                     clickable
                     onClick={() => handleDreamClick(dream)}
                     rightIcon={
-                      <div className={`${styles.dreamEmotion} ${styles[dream.emotion]}`}>
+                      <span className={styles.dreamEmotionText}>
                         {dream.emotionText}
-                      </div>
+                      </span>
                     }
                   />
                 ))}

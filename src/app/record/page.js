@@ -107,13 +107,13 @@ const RecordPage = () => {
       {showDraftDialogContent()}
 
       {/* 导航栏 */}
-      <NavBar
+      {/* <NavBar
         title="梦境记录"
         leftArrow={<ArrowLeft />}
         onClickLeft={() => router.back()}
         fixed
         placeholder
-      />
+      /> */}
 
       {/* 主要内容 */}
       <div className={styles.content}>
