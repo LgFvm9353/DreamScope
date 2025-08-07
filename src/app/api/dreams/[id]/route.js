@@ -158,25 +158,42 @@ export const PUT = withAuth(async (request, { params, userId }) => {
 // 删除梦境 - 使用装饰器方式
 export const DELETE = withAuth(async (request, { params, userId }) => {
   try {
+    console.log('删除梦境请求，参数:', params);
+    console.log('用户ID:', userId);
+    
     const { id } = params;
+    
+    // 确保ID是数字
+    const dreamId = parseInt(id);
+    if (isNaN(dreamId)) {
+      return NextResponse.json(
+        { success: false, message: '无效的梦境ID' },
+        { status: 400 }
+      );
+    }
+    
+    console.log('查找梦境，ID:', dreamId, '用户ID:', userId);
     
     // 查找梦境
     const dream = await Dream.findOne({
       where: {
-        id: id,
+        id: dreamId,
         userId: userId
       }
     });
 
+    console.log('查找结果:', dream ? '找到梦境' : '未找到梦境');
+
     if (!dream) {
       return NextResponse.json(
-        { message: '梦境不存在或无权访问' },
+        { success: false, message: '梦境不存在或无权访问' },
         { status: 404 }
       );
     }
 
     // 删除梦境
     await dream.destroy();
+    console.log('梦境删除成功');
 
     return NextResponse.json({
       success: true,
@@ -186,7 +203,7 @@ export const DELETE = withAuth(async (request, { params, userId }) => {
   } catch (error) {
     console.error('删除梦境失败:', error);
     return NextResponse.json(
-      { message: '服务器错误' },
+      { success: false, message: '服务器错误' },
       { status: 500 }
     );
   }

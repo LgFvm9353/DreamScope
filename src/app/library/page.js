@@ -24,8 +24,9 @@ import {
   Delete,
   More
 } from '@react-vant/icons';
-import WaterfallLayout from '../../components/WaterfallLayout';
-import { dreamAPI } from '../../services/api';
+import WaterfallLayout from '@/components/WaterfallLayout';
+import { dreamAPI } from '@/services/api';
+import useUserStore from '@/store/useUserStore';
 import styles from './page.module.css';
 
 // 情绪选项
@@ -42,6 +43,7 @@ const EMOTION_OPTIONS = [
 
 export default function LibraryPage() {
   const router = useRouter();
+  const { user } = useUserStore();
   const [dreams, setDreams] = useState([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -52,6 +54,17 @@ export default function LibraryPage() {
   const [actionSheetVisible, setActionSheetVisible] = useState(false);
   const [selectedDream, setSelectedDream] = useState(null);
   const [error, setError] = useState('');
+  const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
+  const [dreamToDelete, setDreamToDelete] = useState(null);
+
+  // 检查用户登录状态
+  useEffect(() => {
+    const token = localStorage.getItem('jwt_token');
+    if (!token) {
+      router.push('/login');
+      return;
+    }
+  }, [router]);
 
   // 获取梦境列表
   const fetchDreams = useCallback(async (reset = false, search = '', category = 'all') => {
@@ -146,52 +159,104 @@ export default function LibraryPage() {
     router.push(`/record?edit=${dream.id}`);
   }, [router]);
 
-  // 删除梦境
-  const handleDeleteDream = useCallback(async (dream) => {
-    try {
-      await Dialog.confirm({
-        title: '确认删除',
-        message: '删除后无法恢复，确定要删除这个梦境吗？',
-      });
-
-      const response = await dreamAPI.deleteDream(dream.id);
-      if (response && response.success) {
-        setDreams(prev => prev.filter(item => item.id !== dream.id));
-        // 使用简单的状态更新而不是 Toast
-        setError('');
-      } else {
-        setError(response?.message || '删除失败');
-      }
-    } catch (error) {
-      if (error !== 'cancel') {
-        console.error('删除梦境失败:', error);
-        setError('删除失败，请重试');
-      }
-    }
-  }, []);
-
   // 显示操作菜单
   const handleShowActions = useCallback((dream) => {
     setSelectedDream(dream);
     setActionSheetVisible(true);
   }, []);
 
-  // 操作菜单选项
-  const actionSheetActions = [
-    {
-      name: '编辑',
-      icon: <Edit />,
-      callback: () => handleEditDream(selectedDream)
-    },
-    {
-      name: '删除',
-      icon: <Delete />,
-      color: '#ee0a24',
-      callback: () => handleDeleteDream(selectedDream)
-    }
-  ];
+  // 显示删除确认对话框
+  const showDeleteConfirm = useCallback((dream) => {
+    setDreamToDelete(dream);
+    
+    // 使用 Dialog.confirm 显示更丰富的删除确认
+    Dialog.confirm({
+      title: '⚠️ 删除梦境',
+      message: `确定要删除梦境"${dream.title || '未命名梦境'}"吗？\n\n内容预览：${dream.content?.substring(0, 50)}${dream.content?.length > 50 ? '...' : ''}\n\n⚠️ 删除后无法恢复`,
+      confirmButtonText: '确认删除',
+      cancelButtonText: '取消',
+      confirmButtonColor: '#ee0a24',
+    })
+    .then(() => {
+      confirmDeleteDream();
+    })
+    .catch(() => {
+      // 用户取消删除
+      setDreamToDelete(null);
+    });
+  }, []);
 
-  // 渲染梦境卡片 - 添加安全检查
+  // 确认删除梦境
+  const confirmDeleteDream = useCallback(async () => {
+    if (!dreamToDelete) return;
+
+    try {
+      // 检查用户登录状态
+      const token = localStorage.getItem('jwt_token');
+      if (!token) {
+        setError('请先登录');
+        router.push('/login');
+        return;
+      }
+
+      console.log('开始删除梦境:', dreamToDelete.id);
+      console.log('当前用户:', user);
+      console.log('Token存在:', !!token);
+      
+      const response = await dreamAPI.deleteDream(dreamToDelete.id);
+      console.log('删除响应:', response);
+      
+      if (response && response.success) {
+        setDreams(prev => prev.filter(item => item.id !== dreamToDelete.id));
+        setError('');
+        console.log('删除成功，更新列表');
+      } else {
+        console.error('删除失败:', response);
+        setError(response?.message || '删除失败');
+      }
+    } catch (error) {
+      console.error('删除梦境失败:', error);
+      
+      // 处理超时错误
+      if (error.code === 'ECONNABORTED' && error.message.includes('timeout')) {
+        setError('请求超时，请检查网络连接或稍后重试');
+        return;
+      }
+      
+      // 更详细的错误处理
+      if (error.response) {
+        const status = error.response.status;
+        const message = error.response.data?.message || error.response.data?.error;
+        
+        if (status === 404) {
+          setError('梦境不存在或已被删除');
+        } else if (status === 401) {
+          setError('登录已过期，请重新登录');
+          localStorage.removeItem('jwt_token');
+          router.push('/login');
+        } else if (status === 403) {
+          setError('无权删除此梦境');
+        } else {
+          setError(message || '删除失败，请重试');
+        }
+      } else if (error.request) {
+        setError('网络连接失败，请检查网络');
+      } else {
+        setError('删除失败，请重试');
+      }
+    } finally {
+      setDeleteConfirmVisible(false);
+      setDreamToDelete(null);
+    }
+  }, [dreamToDelete, user, router]);
+
+  // 取消删除
+  const cancelDelete = useCallback(() => {
+    setDeleteConfirmVisible(false);
+    setDreamToDelete(null);
+  }, []);
+
+  // 渲染梦境卡片 - 优化图片显示和间距
   const renderDreamCard = useCallback((dream, index) => {
     // 添加安全检查
     if (!dream || typeof dream !== 'object') {
@@ -199,19 +264,27 @@ export default function LibraryPage() {
       return null;
     }
 
+    // 判断是否有图片
+    const hasImage = dream.image && dream.image.trim() !== '';
+
     return (
       <Card
         key={dream.id || index}
-        className={styles.dreamCard}
+        className={`${styles.dreamCard} ${hasImage ? styles.hasImage : styles.noImage}`}
         onClick={() => handleDreamDetail(dream)}
       >
-        {dream.image && (
+        {/* 只有当图片存在且有效时才显示图片区域 */}
+        {hasImage && (
           <div className={styles.dreamImage}>
             <Image
               src={dream.image}
               alt="梦境图片"
               fit="cover"
               lazy
+              onError={(e) => {
+                // 图片加载失败时隐藏图片容器
+                e.target.parentElement.style.display = 'none';
+              }}
             />
           </div>
         )}
@@ -261,6 +334,21 @@ export default function LibraryPage() {
     );
   }, [handleDreamDetail, handleShowActions]);
 
+  // 操作菜单选项
+  const actionSheetActions = [
+    {
+      name: '编辑',
+      icon: <Edit />,
+      callback: () => handleEditDream(selectedDream)
+    },
+    {
+      name: '删除',
+      icon: <Delete />,
+      color: '#ee0a24',
+      callback: () => showDeleteConfirm(selectedDream)
+    }
+  ];
+
   return (
     <div className={styles.container}>
       {/* 导航栏 */}
@@ -270,18 +358,6 @@ export default function LibraryPage() {
         className={styles.navbar}
         style={{ height: '25px' }}
       />
-
-      {/* 搜索栏 */}
-      {/* <div className={styles.searchSection}>
-        <Search
-          value={searchValue}
-          onChange={setSearchValue}
-          onSearch={handleSearch}
-          placeholder="搜索梦境内容..."
-          leftIcon={<SearchIcon />}
-          className={styles.searchInput}
-        />
-      </div> */}
 
       {/* 分类标签 */}
       <div className={styles.tabsSection}>
@@ -329,7 +405,7 @@ export default function LibraryPage() {
               items={dreams}
               renderItem={renderDreamCard}
               columns={2}
-              gap={16}
+              gap={10} // 减少间距从16到10
               onLoadMore={handleLoadMore}
               hasMore={hasMore}
               loading={loading}
@@ -337,10 +413,12 @@ export default function LibraryPage() {
             />
           ) : (
             !loading && !error && (
-              <Empty
-                description="暂无梦境记录"
-                image="search"
-              />
+              <div className={styles.emptyContainer}>
+                <Empty
+                  description="暂无梦境记录"
+                  image="search"
+                />
+              </div>
             )
           )}
           
@@ -364,6 +442,8 @@ export default function LibraryPage() {
           setActionSheetVisible(false);
         }}
       />
+
+      {/* 删除原来的 Dialog 组件，现在使用 Dialog.confirm */}
     </div>
   );
 }

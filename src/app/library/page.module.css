@@ -42,7 +42,7 @@
 
 .content {
   flex: 1;
-  padding: 16px;
+  padding: 12px; /* 减少内边距 */
 }
 
 .waterfallContainer {
@@ -50,12 +50,14 @@
 }
 
 .dreamCard {
-  margin-bottom: 16px;
+  margin-bottom: 12px; /* 减少底部间距 */
+  background: white;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: all 0.3s ease;
   cursor: pointer;
+  user-select: none;
 }
 
 .dreamCard:hover {
@@ -63,28 +65,64 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 
+.dreamCard:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 长按提示动画 */
+.dreamCard.longPressing {
+  animation: longPressHint 0.5s ease-in-out;
+}
+
+@keyframes longPressHint {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.98); }
+  100% { transform: scale(1); }
+}
+
 .dreamImage {
   width: 100%;
-  height: 120px;
+  height: 140px; /* 稍微增加图片高度 */
   overflow: hidden;
+  position: relative;
 }
 
 .dreamImage img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.dreamCard:hover .dreamImage img {
+  transform: scale(1.05);
 }
 
 .dreamContent {
   padding: 12px;
 }
 
+/* 有图片时减少内容区域的上边距 */
+.dreamCard.hasImage .dreamContent {
+  padding-top: 10px;
+}
+
+/* 无图片时的样式调整 */
+.dreamCard.noImage {
+  border: 1px solid #f0f0f0;
+}
+
+.dreamCard.noImage .dreamContent {
+  padding: 14px 12px; /* 无图片时增加上下内边距 */
+}
+
 .dreamTitle {
-  font-size: 16px;
+  font-size: 15px; /* 稍微减小字体 */
   font-weight: 600;
   color: #333;
-  margin-bottom: 8px;
-  line-height: 1.4;
+  margin-bottom: 6px; /* 减少底部间距 */
+  line-height: 1.3; /* 减少行高 */
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -92,10 +130,10 @@
 }
 
 .dreamDescription {
-  font-size: 14px;
+  font-size: 13px; /* 稍微减小字体 */
   color: #666;
-  line-height: 1.5;
-  margin-bottom: 12px;
+  line-height: 1.4; /* 减少行高 */
+  margin-bottom: 10px; /* 减少底部间距 */
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
@@ -106,55 +144,56 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 6px; /* 减少底部间距 */
 }
 
 .dreamTags {
   display: flex;
-  gap: 6px;
+  gap: 4px; /* 减少标签间距 */
   flex-wrap: wrap;
   flex: 1;
 }
 
 .dreamActions {
   display: flex;
-  gap: 8px;
+  gap: 6px; /* 减少按钮间距 */
   align-items: center;
 }
 
 .dreamDate {
-  font-size: 12px;
+  font-size: 11px; /* 稍微减小字体 */
   color: #999;
   text-align: right;
+  margin-top: 2px;
 }
 
 .skeletonContainer {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+  gap: 12px; /* 减少骨架屏间距 */
 }
 
 .skeletonCard {
-  height: 200px;
+  height: 180px; /* 减少骨架屏高度 */
   border-radius: 12px;
 }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
   .content {
-    padding: 12px;
+    padding: 10px; /* 进一步减少移动端内边距 */
   }
   
   .waterfallContainer {
-    gap: 12px;
+    gap: 10px; /* 减少瀑布流间距 */
   }
   
   .dreamCard {
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
   
   .skeletonContainer {
-    gap: 12px;
+    gap: 10px;
   }
 }
 
@@ -171,12 +210,20 @@
     padding: 10px;
   }
   
+  .dreamCard.noImage .dreamContent {
+    padding: 12px 10px;
+  }
+  
   .dreamTitle {
-    font-size: 15px;
+    font-size: 14px;
   }
   
   .dreamDescription {
-    font-size: 13px;
+    font-size: 12px;
+  }
+  
+  .dreamImage {
+    height: 120px; /* 移动端减少图片高度 */
   }
 }
 
@@ -197,6 +244,14 @@
   justify-content: center;
   padding: 40px 20px;
   color: #999;
+}
+
+.emptyContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  text-align: center;
 }
 
 /* 瀑布流动画 */
