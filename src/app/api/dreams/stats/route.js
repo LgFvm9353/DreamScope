@@ -15,6 +15,20 @@ export const GET = withAuth(async (request, { userId }) => {
       where: { userId }
     });
 
+    // 获取本周数量
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    oneWeekAgo.setHours(0, 0, 0, 0);
+    
+    const weeklyCount = await Dream.count({
+      where: {
+        userId,
+        createdAt: {
+          [Op.gte]: oneWeekAgo
+        }
+      }
+    });
+
     // 获取本月数量
     const currentMonth = new Date();
     currentMonth.setDate(1);
@@ -26,6 +40,28 @@ export const GET = withAuth(async (request, { userId }) => {
         createdAt: {
           [Op.gte]: currentMonth
         }
+      }
+    });
+
+    // 获取本年数量
+    const currentYear = new Date();
+    currentYear.setMonth(0, 1);
+    currentYear.setHours(0, 0, 0, 0);
+    
+    const yearlyCount = await Dream.count({
+      where: {
+        userId,
+        createdAt: {
+          [Op.gte]: currentYear
+        }
+      }
+    });
+
+    // 获取收藏数量
+    const favoriteCount = await Dream.count({
+      where: { 
+        userId,
+        isFavorite: true 
       }
     });
 
@@ -51,34 +87,76 @@ export const GET = withAuth(async (request, { userId }) => {
       raw: true
     });
 
-    // 获取最近7天的数据
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    // 获取分析状态分布
+    const analysisStatusStats = await Dream.findAll({
+      where: { userId },
+      attributes: [
+        'analysisStatus',
+        [Sequelize.fn('COUNT', Sequelize.col('analysisStatus')), 'count']
+      ],
+      group: ['analysisStatus'],
+      raw: true
+    });
+
+    // 获取最近12个月的月度趋势数据
+    const twelveMonthsAgo = new Date();
+    twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 11);
+    twelveMonthsAgo.setDate(1);
+    twelveMonthsAgo.setHours(0, 0, 0, 0);
     
-    const recentDreams = await Dream.findAll({
+    const monthlyTrends = await Dream.findAll({
       where: {
         userId,
         createdAt: {
-          [Op.gte]: sevenDaysAgo
+          [Op.gte]: twelveMonthsAgo
         }
       },
       attributes: [
-        [Sequelize.fn('DATE', Sequelize.col('createdAt')), 'date'],
+        [Sequelize.fn('DATE_FORMAT', Sequelize.col('createdAt'), '%Y-%m'), 'yearMonth'],
         [Sequelize.fn('COUNT', Sequelize.col('id')), 'count']
       ],
-      group: [Sequelize.fn('DATE', Sequelize.col('createdAt'))],
-      order: [[Sequelize.fn('DATE', Sequelize.col('createdAt')), 'ASC']],
+      group: [Sequelize.fn('DATE_FORMAT', Sequelize.col('createdAt'), '%Y-%m')],
+      order: [[Sequelize.fn('DATE_FORMAT', Sequelize.col('createdAt'), '%Y-%m'), 'ASC']],
       raw: true
+    });
+
+    // 格式化月度趋势数据
+    const formattedMonthlyTrends = monthlyTrends.map(item => {
+      const [year, month] = item.yearMonth.split('-');
+      const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+      return {
+        month: monthNames[parseInt(month) - 1],
+        count: parseInt(item.count)
+      };
     });
 
     return NextResponse.json({
       success: true,
       data: {
-        total: totalCount,
-        monthly: monthlyCount,
-        emotions: emotionStats,
-        types: typeStats,
-        recent: recentDreams
+        counts: {
+          total: totalCount,
+          weekly: weeklyCount,
+          monthly: monthlyCount,
+          yearly: yearlyCount,
+          favorite: favoriteCount
+        },
+        distributions: {
+          emotions: emotionStats.map(item => ({
+            emotion: item.emotion,
+            count: item.count.toString()
+          })),
+          types: typeStats.map(item => ({
+            type: item.type,
+            count: item.count.toString()
+          })),
+          analysisStatus: analysisStatusStats.map(item => ({
+            analysisStatus: item.analysisStatus || 'pending',
+            count: item.count.toString()
+          }))
+        },
+        trends: {
+          monthly: formattedMonthlyTrends
+        }
       }
     });
 
