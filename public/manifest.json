@@ -1,0 +1,17 @@
+{
+  "name": "DreamScope",
+  "short_name": "DreamScope",
+  "description": "智能梦境记录与分析平台",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/next.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

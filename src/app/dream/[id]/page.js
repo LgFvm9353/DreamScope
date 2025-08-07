@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { dreamAPI } from '@/services/api';
 import { EMOTION_OPTIONS, DREAM_TYPE_OPTIONS } from '@/config/dreamConfig';
 import styles from './page.module.css';
-
+import useTitle from '@/hooks/useTitle'
 const DreamDetailPage = () => {
   const params = useParams();
   const router = useRouter();
@@ -14,7 +14,7 @@ const DreamDetailPage = () => {
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-  
+  useTitle('梦境详情')
   // 编辑状态的表单数据
   const [editForm, setEditForm] = useState({
     content: '',

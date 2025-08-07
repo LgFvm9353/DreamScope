@@ -15,7 +15,7 @@ import {
 
 // 引入echarts图表库
 import ReactECharts from 'echarts-for-react'
-
+import useTitle from '@/hooks/useTitle'
 // 情绪颜色映射
 const emotionColors = {
   'happy': '#4CAF50',
@@ -98,6 +98,7 @@ const StatCard = ({ icon, title, value, suffix, onClick }) => (
 );
 
 export default function StatisticsPage() {
+  useTitle('图表统计页')
   const router = useRouter();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);

@@ -26,7 +26,7 @@ import WaterfallLayout from '@/components/WaterfallLayout';
 import { dreamAPI } from '@/services/api';
 import useUserStore from '@/store/useUserStore';
 import styles from './page.module.css';
-
+import useTitle from '@/hooks/useTitle'
 // 情绪选项
 const EMOTION_OPTIONS = [
   { value: 'happy', label: '快乐', icon: '😊' },
@@ -54,7 +54,7 @@ export default function LibraryPage() {
   const [error, setError] = useState('');
   const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
   const [dreamToDelete, setDreamToDelete] = useState(null);
-
+  useTitle('梦境库')
   // 检查用户登录状态
   useEffect(() => {
     const token = localStorage.getItem('jwt_token');

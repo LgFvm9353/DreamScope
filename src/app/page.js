@@ -3,11 +3,10 @@
 import { NavBar, Button, Card, Cell, CellGroup, PullRefresh, Skeleton, Toast } from 'react-vant'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'  // 添加这一行导入 useRouter
-import { getRouteByPath } from '@/config/routes'
 import styles from './page.module.css'
 import { useState, useEffect } from 'react'
 import useDreamStore from '@/store/useDreamStore'
-
+import useTitle from '@/hooks/useTitle'
 export default function HomePage() {
   const router = useRouter()  // 添加这一行初始化 router
   const [currentTime, setCurrentTime] = useState('')
@@ -17,7 +16,7 @@ export default function HomePage() {
   const { getDreams } = useDreamStore()
   const [dreams, setDreams] = useState([])
   const [error, setError] = useState(null);
-  
+  useTitle('首页')
   // 获取当前时间和问候语
   useEffect(() => {
     const updateTime = () => {
@@ -69,34 +68,6 @@ export default function HomePage() {
     }
   };
 
-  // 模拟梦境数据
-  const recentDreams = [
-    {
-      id: 1,
-      title: '梦见飞翔',
-      date: '2024-01-15',
-      emotion: 'happy',
-      emotionText: '开心',
-      description: '在天空中自由翱翔，感觉无比轻松'
-    },
-    {
-      id: 2,
-      title: '海边散步',
-      date: '2024-01-14',
-      emotion: 'calm',
-      emotionText: '平静',
-      description: '在海边漫步，听着海浪声'
-    },
-    {
-      id: 3,
-      title: '追逐游戏',
-      date: '2024-01-13',
-      emotion: 'fear',
-      emotionText: '恐惧',
-      description: '被什么东西追赶，感觉很紧张'
-    }
-  ]
-
   // 统计数据
   const stats = {
     total: dreams.length || 12,
@@ -118,8 +89,6 @@ export default function HomePage() {
   // 骨架屏组件
   const DreamSkeleton = () => (
     <div className={styles.container}>
-      {/* 头部 */}
-      {/* <NavBar title="加载中..." className={styles.skeletonHeader} /> */}
 
       {/* 主要内容 */}
       <div className={styles.main}>
@@ -189,6 +158,9 @@ export default function HomePage() {
       successText='刷新成功'
       onRefresh={onRefresh}
     >
+      {/* <Head>
+        <title>首页</title>
+      </Head> */}
       {/* 头部区域 */}
       <NavBar 
         title={<>

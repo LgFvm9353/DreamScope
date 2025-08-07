@@ -10,7 +10,7 @@ import {
   Cross,
   Plus
 }from '@react-vant/icons'
-
+import useTitle from '@/hooks/useTitle'
 // 自定义头像组件替代react-vant的Avatar
 const CustomAvatar = ({ className, children, icon }) => {
   return (
@@ -31,7 +31,7 @@ export default function AnalysisPage() {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
-  
+  useTitle('智能对话')
   // 消息列表变化时滚动到底部
   useEffect(() => {
     scrollToBottom()

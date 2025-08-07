@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation'
 import LoginForm from '@/components/LoginForm'
 import LoginButton from '@/components/LoginButton'
 import styles from './profile.module.css'
-
+import useTitle from '@/hooks/useTitle'
 export default function ProfilePage() {
   const router = useRouter()
   const { user, setUser, logout } = useUserStore()
@@ -17,7 +17,7 @@ export default function ProfilePage() {
   const [avatar, setAvatar] = useState('https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg')
   const [loading, setLoading] = useState(false)
   const [loadingMessage, setLoadingMessage] = useState('')
-  
+  useTitle('我的')
   // 使用 useRef 来引用上传组件
   const uploaderRef = useRef(null)
   

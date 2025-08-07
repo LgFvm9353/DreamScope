@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import useUserStore from '@/store/useUserStore'
 import { userAPI } from '@/services/api'
 import styles from './settings.module.css'
-
+import useTitle from '@/hooks/useTitle'
 export default function SettingsPage() {
   const router = useRouter()
   const { user, setUser } = useUserStore()
@@ -36,7 +36,7 @@ export default function SettingsPage() {
       setMessage(prev => ({ ...prev, visible: false }))
     }, 3000)
   }
-  
+  useTitle('设置')
   useEffect(() => {
     // 如果用户未登录，跳转到个人资料页面
     if (!user) {

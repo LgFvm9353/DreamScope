@@ -6,18 +6,15 @@ import {
   Button, 
   Field, 
   CellGroup, 
-  Toast, 
 } from 'react-vant';
 import { PhotoO } from '@react-vant/icons';
 import { useDreamRecord } from '@/hooks/useDreamRecord';
 import { EMOTION_OPTIONS, DREAM_TYPE_OPTIONS } from '@/config/dreamConfig';
 import styles from './page.module.css';
-import useTitle from '@/hooks/useTitle';
-
+import useTitle from '@/hooks/useTitle'
 const RecordPage = () => {
   const router = useRouter();
-  useTitle('梦境记录'); 
-  
+  useTitle('记录页')
   const {
     dreamData,
     loading,
