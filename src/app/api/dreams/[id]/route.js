@@ -1,52 +1,44 @@
 import { NextResponse } from 'next/server';
 import Dream from '@/models/Dream';
 import { initDatabase } from '@/config/initDb';
-import jwt from 'jsonwebtoken';
-
-// JWT密钥
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+import { verifyJWT, withAuth } from '@/utils/auth';
 
 // 确保数据库已初始化
 initDatabase().catch(console.error);
 
-// 获取单个梦境
-export async function GET(request, { params }) {
+// 获取单个梦境 - 使用装饰器方式
+export const GET = withAuth(async (request, { params, userId }) => {
   try {
-    // 从请求头中获取令牌
-    const authHeader = request.headers.get('Authorization');
-    let userId = null;
+    console.log('开始获取梦境详情，ID:', params.id);
+    console.log('用户ID:', userId);
     
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const token = authHeader.split(' ')[1];
-      try {
-        // 验证令牌
-        const decoded = jwt.verify(token, JWT_SECRET);
-        userId = decoded.id;
-      } catch (error) {
-        return NextResponse.json({ error: '无效的令牌' }, { status: 401 });
-      }
-    }
-
     const { id } = params;
     
     // 添加查询超时控制
     const queryTimeout = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Database query timeout')), 8000);
+      setTimeout(() => reject(new Error('查询超时')), 8000);
     });
     
-    // 优化数据库查询
-    const queryPromise = db.prepare(`
-      SELECT * FROM dreams 
-      WHERE id = ? AND (userId = ? OR userId IS NULL)
-    `).get(id, userId);
+    // 使用Sequelize查询
+    const queryPromise = Dream.findOne({
+      where: {
+        id: parseInt(id),
+        ...(userId ? { userId: userId } : {})
+      },
+      raw: false,
+      nest: true,
+    });
     
-    const dreamData = await Promise.race([queryPromise, queryTimeout]);
+    console.log('开始数据库查询...');
+    const dream = await Promise.race([queryPromise, queryTimeout]);
+    console.log('数据库查询完成:', dream ? '找到梦境' : '未找到梦境');
     
-    if (!dreamData) {
+    if (!dream) {
       return NextResponse.json({ error: '梦境不存在' }, { status: 404 });
     }
 
     // 格式化返回数据
+    const dreamData = dream.toJSON();
     const formattedDream = {
       id: dreamData.id,
       content: dreamData.content,
@@ -59,46 +51,28 @@ export async function GET(request, { params }) {
       createdAt: dreamData.createdAt
     };
     
+    console.log('返回梦境数据');
     return NextResponse.json(formattedDream);
   } catch (error) {
     console.error('获取梦境详情失败:', error);
     
-    if (error.message === 'Database query timeout') {
-      return NextResponse.json({ error: '数据库查询超时' }, { status: 408 });
+    if (error.message === '查询超时') {
+      return NextResponse.json({ error: '数据库查询超时，请稍后重试' }, { status: 408 });
+    } else if (error.name === 'SequelizeConnectionError') {
+      return NextResponse.json({ error: '数据库连接失败' }, { status: 503 });
+    } else if (error.name === 'SequelizeTimeoutError') {
+      return NextResponse.json({ error: '数据库操作超时' }, { status: 408 });
     }
     
     return NextResponse.json({ error: '服务器内部错误' }, { status: 500 });
   }
-}
+}, false); // false表示JWT验证不是必须的
 
-// 更新梦境
-export async function PUT(request, { params }) {
+// 更新梦境 - 使用装饰器方式，必须验证
+export const PUT = withAuth(async (request, { params, userId }) => {
   try {
     const { id } = params;
     
-    // 验证用户身份
-    const authHeader = request.headers.get('Authorization');
-    let userId = null;
-    
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const token = authHeader.split(' ')[1];
-      try {
-        const decoded = jwt.verify(token, JWT_SECRET);
-        userId = decoded.id;
-      } catch (error) {
-        console.error('令牌验证失败:', error);
-        return NextResponse.json(
-          { message: '未授权' },
-          { status: 401 }
-        );
-      }
-    } else {
-      return NextResponse.json(
-        { message: '未授权' },
-        { status: 401 }
-      );
-    }
-
     // 解析请求体
     const body = await request.json();
     const { content, emotion, type, tags } = body;
@@ -179,44 +153,41 @@ export async function PUT(request, { params }) {
       { status: 500 }
     );
   }
-}
+}, true); // true表示必须验证JWT
 
-// 删除梦境
-export async function DELETE(request, { params }) {
+// 删除梦境 - 使用装饰器方式
+export const DELETE = withAuth(async (request, { params, userId }) => {
   try {
     const { id } = params;
     
-    // JWT验证逻辑（与GET方法相同）
-    const authHeader = request.headers.get('Authorization');
-    let userId = null;
-    
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const token = authHeader.split(' ')[1];
-      try {
-        const decoded = jwt.verify(token, JWT_SECRET);
-        userId = decoded.id;
-      } catch (error) {
-        return NextResponse.json({ message: '未授权' }, { status: 401 });
-      }
-    } else {
-      return NextResponse.json({ message: '未授权' }, { status: 401 });
-    }
-    
-    // 删除梦境
-    const result = await Dream.destroy({
+    // 查找梦境
+    const dream = await Dream.findOne({
       where: {
         id: id,
         userId: userId
       }
     });
-    
-    if (result === 0) {
-      return NextResponse.json({ message: '梦境不存在或无权删除' }, { status: 404 });
+
+    if (!dream) {
+      return NextResponse.json(
+        { message: '梦境不存在或无权访问' },
+        { status: 404 }
+      );
     }
-    
-    return NextResponse.json({ success: true, message: '删除成功' });
+
+    // 删除梦境
+    await dream.destroy();
+
+    return NextResponse.json({
+      success: true,
+      message: '删除成功'
+    });
+
   } catch (error) {
     console.error('删除梦境失败:', error);
-    return NextResponse.json({ message: '服务器错误' }, { status: 500 });
+    return NextResponse.json(
+      { message: '服务器错误' },
+      { status: 500 }
+    );
   }
-}
+}, true);

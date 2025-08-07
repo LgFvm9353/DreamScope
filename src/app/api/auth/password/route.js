@@ -1,73 +1,61 @@
 import { NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
 import User from '@/models/User';
+import { withAuth } from '@/utils/auth';
 
-// JWT密钥
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
-
-export async function POST(request) {
+// 更新密码
+export const POST = withAuth(async (request, { userId }) => {
   try {
-    // 从请求头中获取令牌
-    const authHeader = request.headers.get('Authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { message: '未授权' },
-        { status: 401 }
-      );
-    }
-
-    const token = authHeader.split(' ')[1];
-
-    // 验证令牌
-    const decoded = jwt.verify(token, JWT_SECRET);
-    
-    // 获取请求体
     const body = await request.json();
-    const { newPassword } = body;
-    
-    if (!newPassword) {
+    const { currentPassword, newPassword } = body;
+
+    // 验证输入
+    if (!currentPassword || !newPassword) {
       return NextResponse.json(
-        { message: '新密码不能为空' },
+        { message: '当前密码和新密码不能为空' },
         { status: 400 }
       );
     }
-    
-    // 查找用户
-    const user = await User.findByPk(decoded.id);
+
+    if (newPassword.length < 6) {
+      return NextResponse.json(
+        { message: '新密码长度不能少于6位' },
+        { status: 400 }
+      );
+    }
+
+    // 获取用户信息
+    const user = await User.findByPk(userId);
     if (!user) {
       return NextResponse.json(
         { message: '用户不存在' },
         { status: 404 }
       );
     }
-    
-    // 更新密码
-    user.password = newPassword;
-    await user.save();
-    
+
+    // 验证当前密码 - 使用bcrypt比较
+    const isCurrentPasswordValid = await user.validatePassword(currentPassword);
+    if (!isCurrentPasswordValid) {
+      return NextResponse.json(
+        { message: '当前密码错误' },
+        { status: 400 }
+      );
+    }
+
+    // 更新密码（bcrypt加密会在beforeUpdate hook中自动处理）
+    await user.update({
+      password: newPassword
+    });
+
     return NextResponse.json({
+      success: true,
       message: '密码更新成功'
     });
+
   } catch (error) {
-    console.error('更新密码错误:', error);
-    
-    if (error.name === 'JsonWebTokenError') {
-      return NextResponse.json(
-        { message: '无效的令牌' },
-        { status: 401 }
-      );
-    }
-    
-    if (error.name === 'TokenExpiredError') {
-      return NextResponse.json(
-        { message: '令牌已过期' },
-        { status: 401 }
-      );
-    }
-    
+    console.error('更新密码失败:', error);
     return NextResponse.json(
       { message: '服务器错误' },
       { status: 500 }
     );
   }
-}
+}, true);

@@ -1,6 +1,6 @@
 import { Sequelize } from 'sequelize';
 import 'dotenv/config';
-import mysql2 from 'mysql2'; // 确保导入 mysql2
+import mysql2 from 'mysql2';
 
 const sequelize = new Sequelize(
   process.env.DB_NAME,
@@ -10,13 +10,37 @@ const sequelize = new Sequelize(
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
     dialect: 'mysql',
-    dialectModule: mysql2, // 显式指定使用 mysql2 模块
-    logging: false, // 设置为 true 可以在控制台看到 SQL 查询
+    dialectModule: mysql2,
+    logging: console.log, // 临时开启日志，用于调试
+    
+    // 连接池配置
+    pool: {
+      max: 10,          // 最大连接数
+      min: 0,           // 最小连接数
+      acquire: 30000,   // 获取连接的最大时间(毫秒)
+      idle: 10000,      // 连接空闲的最大时间(毫秒)
+    },
+    
+    // 查询超时设置
     dialectOptions: {
       dateStrings: true,
       typeCast: true,
+      connectTimeout: 10000,    // 连接超时 10秒
     },
-    timezone: '+08:00', // 设置时区
+    
+    // 重试配置
+    retry: {
+      match: [
+        /ETIMEDOUT/,
+        /EHOSTUNREACH/,
+        /ECONNRESET/,
+        /ECONNREFUSED/,
+        /TIMEOUT/,
+      ],
+      max: 3, // 最大重试次数
+    },
+    
+    timezone: '+08:00',
   }
 );
 

@@ -1,29 +1,15 @@
-// 修改导入部分
 import { NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
-import User from '@/models/User'; // 导入User模型
+import User from '@/models/User';
+import { withAuth } from '@/utils/auth';
+import { Op } from 'sequelize'; // 添加了缺少的导入
 
-// JWT密钥
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
-
-export async function GET(request) {
+// 获取用户信息
+export const GET = withAuth(async (request, { userId }) => {
   try {
-    // 从请求头中获取令牌
-    const authHeader = request.headers.get('Authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { message: '未授权' },
-        { status: 401 }
-      );
-    }
+    const user = await User.findByPk(userId, {
+      attributes: ['id', 'username', 'email', 'createdAt']
+    });
 
-    const token = authHeader.split(' ')[1];
-
-    // 验证令牌
-    const decoded = jwt.verify(token, JWT_SECRET);
-    
-    // 查找用户 - 使用Sequelize模型
-    const user = await User.findByPk(decoded.id);
     if (!user) {
       return NextResponse.json(
         { message: '用户不存在' },
@@ -31,95 +17,97 @@ export async function GET(request) {
       );
     }
 
-    // 返回用户信息（不包含密码）
-    const userResponse = user.toJSON();
-    delete userResponse.password;
-
-    return NextResponse.json(userResponse);
-  } catch (error) {
-    console.error('获取用户信息错误:', error);
-    
-    if (error.name === 'JsonWebTokenError') {
-      return NextResponse.json(
-        { message: '无效的令牌' },
-        { status: 401 }
-      );
-    }
-    
-    if (error.name === 'TokenExpiredError') {
-      return NextResponse.json(
-        { message: '令牌已过期' },
-        { status: 401 }
-      );
-    }
-    
-    return NextResponse.json(
-      { message: '服务器错误' },
-      { status: 500 }
-    );
-  }
-}
-
-export async function PUT(request) {
-  try {
-    // 从请求头中获取令牌
-    const authHeader = request.headers.get('Authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { message: '未授权' },
-        { status: 401 }
-      );
-    }
-
-    const token = authHeader.split(' ')[1];
-
-    // 验证令牌
-    const decoded = jwt.verify(token, JWT_SECRET);
-    
-    // 获取请求体
-    const body = await request.json();
-    
-    // 查找用户 - 使用Sequelize模型
-    const user = await User.findByPk(decoded.id);
-    if (!user) {
-      return NextResponse.json(
-        { message: '用户不存在' },
-        { status: 404 }
-      );
-    }
-    
-    // 更新用户信息（不允许更新密码）
-    const { password, ...updateData } = body;
-    await user.update(updateData);
-    
-    // 返回更新后的用户信息（不包含密码）
-    const userResponse = user.toJSON();
-    delete userResponse.password;
-    
     return NextResponse.json({
-      message: '用户信息更新成功',
-      user: userResponse
+      success: true,
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        createdAt: user.createdAt
+      }
     });
   } catch (error) {
-    console.error('更新用户信息错误:', error);
-    
-    if (error.name === 'JsonWebTokenError') {
-      return NextResponse.json(
-        { message: '无效的令牌' },
-        { status: 401 }
-      );
-    }
-    
-    if (error.name === 'TokenExpiredError') {
-      return NextResponse.json(
-        { message: '令牌已过期' },
-        { status: 401 }
-      );
-    }
-    
+    console.error('获取用户信息失败:', error);
     return NextResponse.json(
       { message: '服务器错误' },
       { status: 500 }
     );
   }
-}
+}, true);
+
+// 更新用户信息
+export const PUT = withAuth(async (request, { userId }) => {
+  try {
+    const body = await request.json();
+    const { username, email } = body;
+
+    // 验证输入
+    if (!username || !email) {
+      return NextResponse.json(
+        { message: '用户名和邮箱不能为空' },
+        { status: 400 }
+      );
+    }
+
+    // 检查用户名是否已存在（排除当前用户）
+    const existingUser = await User.findOne({
+      where: {
+        username,
+        id: { [Op.ne]: userId }
+      }
+    });
+
+    if (existingUser) {
+      return NextResponse.json(
+        { message: '用户名已存在' },
+        { status: 400 }
+      );
+    }
+
+    // 检查邮箱是否重复
+    const existingEmail = await User.findOne({
+      where: {
+        email,
+        id: { [Op.ne]: userId }
+      }
+    });
+
+    if (existingEmail) {
+      return NextResponse.json(
+        { message: '邮箱重复' },
+        { status: 400 }
+      );
+    }
+
+    // 更新用户信息
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return NextResponse.json(
+        { message: '用户不存在' },
+        { status: 404 }
+      );
+    }
+
+    await user.update({
+      username,
+      email
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: '用户信息更新成功',
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email
+      }
+    });
+
+  } catch (error) {
+    console.error('更新用户信息失败:', error);
+    return NextResponse.json(
+      { message: '服务器错误' },
+      { status: 500 }
+    );
+  }
+}, true);

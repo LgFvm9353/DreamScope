@@ -1,9 +1,6 @@
 import { NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
 import User from '@/models/User';
-
-// JWT密钥
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+import { generateJWT } from '@/utils/auth';
 
 export async function POST(request) {
   try {
@@ -20,10 +17,9 @@ export async function POST(request) {
 
     // 查找用户
     const user = await User.findOne({
-      where: { username },
+      where: { username }
     });
 
-    // 用户不存在
     if (!user) {
       return NextResponse.json(
         { message: '用户名或密码错误' },
@@ -31,7 +27,7 @@ export async function POST(request) {
       );
     }
 
-    // 验证密码
+    // 验证密码 - 使用bcrypt比较
     const isPasswordValid = await user.validatePassword(password);
     if (!isPasswordValid) {
       return NextResponse.json(
@@ -41,23 +37,23 @@ export async function POST(request) {
     }
 
     // 生成JWT令牌
-    const token = jwt.sign(
-      { id: user.id, username: user.username },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-
-    // 返回用户信息和令牌（不包含密码）
-    const userResponse = user.toJSON();
-    delete userResponse.password;
+    const token = generateJWT({
+      id: user.id,
+      username: user.username
+    });
 
     return NextResponse.json({
       message: '登录成功',
-      user: userResponse,
-      token
+      token,
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email
+      }
     });
+
   } catch (error) {
-    console.error('登录错误:', error);
+    console.error('登录失败:', error);
     return NextResponse.json(
       { message: '服务器错误' },
       { status: 500 }

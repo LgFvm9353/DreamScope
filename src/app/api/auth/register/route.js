@@ -1,10 +1,7 @@
 import { NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
 import User from '@/models/User';
 import { initDatabase } from '@/config/initDb';
-
-// JWT密钥
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+import { generateJWT } from '@/utils/auth';
 
 // 确保数据库已初始化
 initDatabase().catch(console.error);
@@ -22,9 +19,20 @@ export async function POST(request) {
       );
     }
 
+    // 验证密码长度
+    if (password.length < 6) {
+      return NextResponse.json(
+        { message: '密码长度不能少于6位' },
+        { status: 400 }
+      );
+    }
+
     // 检查用户名是否已存在
-    const existingUsername = await User.findOne({ where: { username } });
-    if (existingUsername) {
+    const existingUser = await User.findOne({
+      where: { username }
+    });
+
+    if (existingUser) {
       return NextResponse.json(
         { message: '用户名已存在' },
         { status: 400 }
@@ -32,7 +40,10 @@ export async function POST(request) {
     }
 
     // 检查邮箱是否已存在
-    const existingEmail = await User.findOne({ where: { email } });
+    const existingEmail = await User.findOne({
+      where: { email }
+    });
+
     if (existingEmail) {
       return NextResponse.json(
         { message: '邮箱已被注册' },
@@ -40,34 +51,31 @@ export async function POST(request) {
       );
     }
 
-    // 创建新用户
-    const newUser = await User.create({
+    // 创建用户
+    const user = await User.create({
       username,
-      password, // 密码会在模型的钩子中自动加密
-      email,
-      level: '1级',
-      signature: '新用户',
-      avatar: 'https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg',
+      password,
+      email
     });
 
     // 生成JWT令牌
-    const token = jwt.sign(
-      { id: newUser.id, username: newUser.username },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-
-    // 返回用户信息和令牌（不包含密码）
-    const userResponse = newUser.toJSON();
-    delete userResponse.password;
+    const token = generateJWT({
+      id: user.id,
+      username: user.username
+    });
 
     return NextResponse.json({
       message: '注册成功',
-      user: userResponse,
-      token
-    });
+      token,
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email
+      }
+    }, { status: 201 });
+
   } catch (error) {
-    console.error('注册错误:', error);
+    console.error('注册失败:', error);
     return NextResponse.json(
       { message: '服务器错误' },
       { status: 500 }
