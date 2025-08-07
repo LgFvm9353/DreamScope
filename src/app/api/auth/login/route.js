@@ -48,7 +48,8 @@ export async function POST(request) {
       user: {
         id: user.id,
         username: user.username,
-        email: user.email
+        email: user.email,
+        avatar: user.avatar // 添加头像字段
       }
     });
 

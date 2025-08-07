@@ -7,7 +7,7 @@ import { Op } from 'sequelize'; // 添加了缺少的导入
 export const GET = withAuth(async (request, { userId }) => {
   try {
     const user = await User.findByPk(userId, {
-      attributes: ['id', 'username', 'email', 'createdAt']
+      attributes: ['id', 'username', 'email', 'avatar', 'createdAt'] // 添加avatar字段
     });
 
     if (!user) {
@@ -23,6 +23,7 @@ export const GET = withAuth(async (request, { userId }) => {
         id: user.id,
         username: user.username,
         email: user.email,
+        avatar: user.avatar, // 添加头像字段
         createdAt: user.createdAt
       }
     });
@@ -39,7 +40,7 @@ export const GET = withAuth(async (request, { userId }) => {
 export const PUT = withAuth(async (request, { userId }) => {
   try {
     const body = await request.json();
-    const { username, email } = body;
+    const { username, email, avatar } = body; // 添加avatar参数
 
     // 验证输入
     if (!username || !email) {
@@ -88,10 +89,18 @@ export const PUT = withAuth(async (request, { userId }) => {
       );
     }
 
-    await user.update({
+    // 准备更新数据
+    const updateData = {
       username,
       email
-    });
+    };
+
+    // 如果提供了头像，则更新头像
+    if (avatar !== undefined) {
+      updateData.avatar = avatar;
+    }
+
+    await user.update(updateData);
 
     return NextResponse.json({
       success: true,
@@ -99,7 +108,8 @@ export const PUT = withAuth(async (request, { userId }) => {
       user: {
         id: user.id,
         username: user.username,
-        email: user.email
+        email: user.email,
+        avatar: user.avatar // 返回头像字段
       }
     });
 

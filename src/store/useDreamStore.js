@@ -118,6 +118,10 @@ const useDreamStore = create(
           
           const dreamRecord = {
             ...dreamData,
+            // 将标签数组转换为逗号分隔的字符串
+            tags: Array.isArray(dreamData.tags) 
+              ? dreamData.tags.filter(tag => tag.trim()).join(',')
+              : dreamData.tags || '',
             image: uploadedImageUrl, // 使用上传后的图片URL
             createdAt: new Date().toISOString(),
             analysisStatus: 'pending',
