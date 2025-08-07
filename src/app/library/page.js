@@ -4,7 +4,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   NavBar, 
-  Search, 
   Tabs, 
   Card, 
   Tag, 
@@ -12,7 +11,6 @@ import {
   Skeleton,
   Empty,
   PullRefresh,
-  List,
   Image,
   ActionSheet,
   Dialog
@@ -443,7 +441,6 @@ export default function LibraryPage() {
         }}
       />
 
-      {/* 删除原来的 Dialog 组件，现在使用 Dialog.confirm */}
     </div>
   );
 }

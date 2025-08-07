@@ -1,17 +1,24 @@
 .container {
-  min-height: 100vh;
+  height: 100vh;
   background-color: #f8f9fa;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding-bottom: 60px; /* 为底部导航栏预留空间 */
 }
 
 .navbar {
   background-color: #fff;
   border-bottom: 1px solid #ebedf0;
+  flex-shrink: 0;
+  z-index: 100;
 }
 
 .searchSection {
   padding: 16px;
   background-color: #fff;
   border-bottom: 1px solid #ebedf0;
+  flex-shrink: 0;
 }
 
 .searchInput {
@@ -21,6 +28,8 @@
 .tabsSection {
   background-color: #fff;
   border-bottom: 1px solid #ebedf0;
+  flex-shrink: 0;
+  z-index: 99;
 }
 
 .tabs {
@@ -42,7 +51,17 @@
 
 .content {
   flex: 1;
-  padding: 12px; /* 减少内边距 */
+  padding: 12px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.emptyContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  text-align: center;
 }
 
 .waterfallContainer {
