@@ -11,6 +11,7 @@ import {
   Plus
 }from '@react-vant/icons'
 import useTitle from '@/hooks/useTitle'
+
 // 自定义头像组件替代react-vant的Avatar
 const CustomAvatar = ({ className, children, icon }) => {
   return (
@@ -23,7 +24,7 @@ const CustomAvatar = ({ className, children, icon }) => {
 
 export default function AnalysisPage() {
   const router = useRouter()
-  const { messages, isLoading, sendMessage, clearMessages } = useChatStore()
+  const { messages, isLoading, sendMessage, sendMessageStream, clearMessages } = useChatStore()
   const [inputValue, setInputValue] = useState('')
   const messagesEndRef = useRef(null)
   
@@ -32,17 +33,26 @@ export default function AnalysisPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
   useTitle('智能对话')
+  
   // 消息列表变化时滚动到底部
   useEffect(() => {
     scrollToBottom()
   }, [messages])
   
   // 发送消息
-  const handleSend = () => {
-    if (!inputValue.trim()) return
-    sendMessage(inputValue.trim())
-    setInputValue('')
-  }
+  const handleSend = async () => {
+    if (!inputValue.trim()) return;
+    
+    const message = inputValue.trim();
+    setInputValue('');
+    
+    // 使用流式发送（如果可用），否则使用普通发送
+    if (sendMessageStream) {
+      await sendMessageStream(message);
+    } else {
+      await sendMessage(message);
+    }
+  };
   
   // 按Enter发送
   const handleKeyPress = (e) => {
@@ -62,6 +72,9 @@ export default function AnalysisPage() {
     clearMessages()
     setInputValue('')
   }
+
+  // 检查是否有正在流式输出的消息
+  const hasStreamingMessage = messages.some(msg => msg.isStreaming)
   
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -80,7 +93,6 @@ export default function AnalysisPage() {
       </div>
 
       <div className={`${styles.chatContainer} scroll-container`}>
-        {/* 移除 overflow-y-auto，已在CSS中设置 */}
         {messages.length === 0 ? (
           <div className={styles.emptyContainer}>
             <Empty 
@@ -99,11 +111,23 @@ export default function AnalysisPage() {
                   <CustomAvatar 
                     className={styles.avatar}
                     icon={message.type === 'user' ? <UserO/> : <ChatO/>}
-                  >
-                    {/* {message.type === 'user' ? '我' : 'AI'} */}
-                  </CustomAvatar>
+                  />
                   <div className={styles.messageBubble}>
-                    {message.content}
+                    {/* 如果是空的AI消息且正在流式输出，显示等待提示 */}
+                    {message.type === 'ai' && message.content === '' && message.isStreaming ? (
+                      <div className={styles.streamingPlaceholder}>
+                        <Loading type="spinner" size="14px" />
+                        <span>AI正在回复...</span>
+                      </div>
+                    ) : (
+                      <>
+                        {message.content}
+                        {/* 流式输出光标 */}
+                        {message.isStreaming && message.content && (
+                          <span className={styles.streamingCursor}>▊</span>
+                        )}
+                      </>
+                    )}
                     <div className={styles.messageTime}>
                       {new Date(message.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                     </div>
@@ -111,10 +135,12 @@ export default function AnalysisPage() {
                 </div>
               </div>
             ))}
-            {isLoading && (
+            
+            {/* 只在非流式模式下且正在加载时显示"正在思考" */}
+            {isLoading && !hasStreamingMessage && (
               <div className={`${styles.messageItem} ${styles.aiMessage}`}>
                 <div className={styles.messageContent}>
-                  <CustomAvatar className={styles.avatar} icon={<ChatO/>}>AI</CustomAvatar>
+                  <CustomAvatar className={styles.avatar} icon={<ChatO/>} />
                   <div className={`${styles.messageBubble} ${styles.loadingBubble}`}>
                     <Loading type="spinner" /> 正在思考...
                   </div>
@@ -126,7 +152,7 @@ export default function AnalysisPage() {
         )}
       </div>
       
-      {/* 输入容器保持不变 */}
+      {/* 输入容器 */}
       <div className={styles.inputContainer}>
         <div className={styles.inputWrapper}>
           <Input.TextArea

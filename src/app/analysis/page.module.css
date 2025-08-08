@@ -201,3 +201,45 @@
   font-size: 12px;
   margin-top: 2px;
 }
+
+
+/* 流式输出光标动画 */
+.streamingCursor {
+  animation: blink 1s infinite;
+  color: #007AFF;
+  margin-left: 2px;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+/* 流式输出占位符 */
+.streamingPlaceholder {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #999;
+  font-size: 14px;
+}
+
+.streamingPlaceholder span {
+  font-style: italic;
+}
+
+/* 消息渐入动画 */
+.messageItem {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
