@@ -1,11 +1,8 @@
 import { NextResponse } from 'next/server';
 import Dream from '@/models/Dream';
-import { initDatabase } from '@/config/initDb';
-import { verifyJWT, withAuth } from '@/utils/auth';
-import { Op } from 'sequelize';
+import { withAuth } from '@/utils/auth';
 
-// 确保数据库已初始化
-initDatabase().catch(console.error);
+import { Op } from 'sequelize';
 
 // 获取梦境列表 - 可选验证
 export const GET = withAuth(async (request, { userId }) => {

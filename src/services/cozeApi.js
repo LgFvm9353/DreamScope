@@ -11,12 +11,8 @@ export const cozeWorkflowAPI = {
     try {
       // 检查API配置
       if (!COZE_PAT_TOKEN || !COZE_WORKFLOW_ID) {
-        console.error('Coze API配置缺失');
         throw new Error('Coze API配置缺失');
       }
-
-      console.log('使用工作流ID:', COZE_WORKFLOW_ID);
-      console.log('使用签名:', signature);
       
       // 准备请求参数 - 根据最新的Coze API文档
       const requestData = {
@@ -34,8 +30,6 @@ export const cozeWorkflowAPI = {
         }
       });
       
-      console.log('API响应:', response.data);
-      
       // 检查响应
       if (response.data.code !== 0) {
         console.error('工作流调用失败:', response.data);
@@ -52,7 +46,6 @@ export const cozeWorkflowAPI = {
         try {
           // 解析JSON字符串
           const parsedData = JSON.parse(responseData.data);
-          console.log('解析后的数据:', parsedData);
           
           // 尝试从解析后的数据中提取URL
           if (parsedData.output && typeof parsedData.output === 'string') {
@@ -81,17 +74,14 @@ export const cozeWorkflowAPI = {
       }
       
       if (!imageUrl) {
-        console.error('未找到图片URL，完整响应:', responseData);
         throw new Error('未获取到图片URL');
       }
       
-      console.log('获取到图片URL:', imageUrl);
       
       return {
         imageUrl: imageUrl
       };
     } catch (error) {
-      console.error('Coze工作流调用失败:', error);
       throw error;
     }
   }

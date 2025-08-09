@@ -97,6 +97,15 @@ export const dreamAPI = {
   }),
 };
 
+// 统计相关API
+export const statsAPI = {
+  // 获取统计数据
+  getStats: () => api.get('/dreams/stats'),
+  
+  // 获取详细统计
+  getDetailedStats: (params = {}) => api.get('/dreams/stats', { params }),
+};
+
 // 用户相关API
 export const userAPI = {
   // 登录

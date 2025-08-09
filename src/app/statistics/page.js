@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { Cell, Loading, Empty, Tabs, Button } from 'react-vant'
 import { useRouter } from 'next/navigation'
-import { dreamAPI } from '@/services/api'
+import { statsAPI } from '@/services/api'
 import styles from './page.module.css'
 import {
   ChartTrendingO,
@@ -16,6 +16,7 @@ import {
 // 引入echarts图表库
 import ReactECharts from 'echarts-for-react'
 import useTitle from '@/hooks/useTitle'
+
 // 情绪颜色映射
 const emotionColors = {
   'happy': '#4CAF50',
@@ -111,17 +112,43 @@ export default function StatisticsPage() {
     setError(null);
     
     try {
-      const response = await dreamAPI.getDreamStats();
+      console.log('开始获取统计数据...');
+      const response = await statsAPI.getStats();
+      console.log('统计数据响应:', response);
+      
       if (response && response.success) {
         setStats(response.data);
+        console.log('统计数据设置成功:', response.data);
       } else {
         throw new Error(response?.message || '获取统计数据失败');
       }
     } catch (error) {
       console.error('获取统计数据失败:', error);
       setError('获取统计数据失败，请重试');
-      // 使用模拟数据（仅开发阶段）
-      setStats(mockStats);
+      
+      // 如果是未登录错误，不使用模拟数据
+      if (error.response?.status === 401) {
+        setStats(null);
+      } else {
+        // 其他错误情况下使用空数据结构，避免显示错误的模拟数据
+        setStats({
+          counts: {
+            total: 0,
+            weekly: 0,
+            monthly: 0,
+            yearly: 0,
+            favorite: 0
+          },
+          distributions: {
+            emotions: [],
+            types: [],
+            analysisStatus: []
+          },
+          trends: {
+            monthly: []
+          }
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -144,7 +171,7 @@ export default function StatisticsPage() {
   
   // 格式化情绪分布数据
   const formatEmotionData = () => {
-    if (!stats) return [];
+    if (!stats || !stats.distributions || !stats.distributions.emotions) return [];
     
     return stats.distributions.emotions.map(item => ({
       name: emotionText[item.emotion] || item.emotion,
@@ -157,7 +184,7 @@ export default function StatisticsPage() {
   
   // 格式化梦境类型分布数据
   const formatTypeData = () => {
-    if (!stats) return [];
+    if (!stats || !stats.distributions || !stats.distributions.types) return [];
     
     return stats.distributions.types.map(item => ({
       name: typeText[item.type] || item.type,
@@ -170,7 +197,7 @@ export default function StatisticsPage() {
   
   // 格式化分析状态分布数据
   const formatAnalysisStatusData = () => {
-    if (!stats) return [];
+    if (!stats || !stats.distributions || !stats.distributions.analysisStatus) return [];
     
     return stats.distributions.analysisStatus.map(item => ({
       name: analysisStatusText[item.analysisStatus] || item.analysisStatus,
@@ -183,7 +210,7 @@ export default function StatisticsPage() {
   
   // 格式化月度趋势数据
   const formatMonthlyTrendData = () => {
-    if (!stats) return { xAxis: [], series: [] };
+    if (!stats || !stats.trends || !stats.trends.monthly) return { xAxis: [], series: [] };
     
     const months = stats.trends.monthly.map(item => item.month);
     const counts = stats.trends.monthly.map(item => item.count);
@@ -297,15 +324,21 @@ export default function StatisticsPage() {
       },
       xAxis: {
         type: 'category',
-        data: xAxis
+        data: xAxis,
+        axisLabel: {
+          fontSize: 10
+        }
       },
       yAxis: {
-        type: 'value'
+        type: 'value',
+        axisLabel: {
+          fontSize: 10
+        }
       },
       grid: {
         left: '3%',
         right: '4%',
-        bottom: '10%',
+        bottom: '3%',
         top: '10%',
         containLabel: true
       },
@@ -316,11 +349,7 @@ export default function StatisticsPage() {
           data: series,
           smooth: true,
           itemStyle: {
-            color: '#8884d8'
-          },
-          lineStyle: {
-            width: 3,
-            color: '#8884d8'
+            color: '#4CAF50'
           },
           areaStyle: {
             color: {
@@ -329,16 +358,11 @@ export default function StatisticsPage() {
               y: 0,
               x2: 0,
               y2: 1,
-              colorStops: [
-                {
-                  offset: 0,
-                  color: 'rgba(136, 132, 216, 0.6)'
-                },
-                {
-                  offset: 1,
-                  color: 'rgba(136, 132, 216, 0.1)'
-                }
-              ]
+              colorStops: [{
+                offset: 0, color: 'rgba(76, 175, 80, 0.3)'
+              }, {
+                offset: 1, color: 'rgba(76, 175, 80, 0.1)'
+              }]
             }
           }
         }
@@ -380,57 +404,6 @@ export default function StatisticsPage() {
     };
   };
   
-  // 模拟统计数据（仅开发阶段使用）
-  const mockStats = {
-    counts: {
-      total: 42,
-      weekly: 5,
-      monthly: 12,
-      yearly: 42,
-      favorite: 8
-    },
-    distributions: {
-      emotions: [
-        { emotion: 'happy', count: '10' },
-        { emotion: 'sad', count: '8' },
-        { emotion: 'fear', count: '7' },
-        { emotion: 'calm', count: '6' },
-        { emotion: 'anxious', count: '5' },
-        { emotion: 'neutral', count: '4' },
-        { emotion: 'surprise', count: '2' }
-      ],
-      types: [
-        { type: 'normal', count: '20' },
-        { type: 'nightmare', count: '8' },
-        { type: 'lucid', count: '6' },
-        { type: 'recurring', count: '5' },
-        { type: 'prophetic', count: '3' }
-      ],
-      analysisStatus: [
-        { analysisStatus: 'completed', count: '30' },
-        { analysisStatus: 'pending', count: '5' },
-        { analysisStatus: 'skipped', count: '5' },
-        { analysisStatus: 'failed', count: '2' }
-      ]
-    },
-    trends: {
-      monthly: [
-        { month: '1月', count: 2 },
-        { month: '2月', count: 3 },
-        { month: '3月', count: 5 },
-        { month: '4月', count: 4 },
-        { month: '5月', count: 6 },
-        { month: '6月', count: 3 },
-        { month: '7月', count: 4 },
-        { month: '8月', count: 5 },
-        { month: '9月', count: 7 },
-        { month: '10月', count: 8 },
-        { month: '11月', count: 6 },
-        { month: '12月', count: 5 }
-      ]
-    }
-  };
-  
   if (loading) {
     return (
       <div className="flex-center min-h-screen">
@@ -439,7 +412,7 @@ export default function StatisticsPage() {
     );
   }
   
-  if (error) {
+  if (error && !stats) {
     return (
       <div className="flex-center min-h-screen flex-col">
         <Empty description={error} />
@@ -474,19 +447,19 @@ export default function StatisticsPage() {
         <StatCard 
           icon={<Description />} 
           title="总梦境" 
-          value={stats?.counts.total || 0} 
+          value={stats?.counts?.total || 0} 
           suffix="条"
         />
         <StatCard 
           icon={<ClockO />} 
           title="本周" 
-          value={stats?.counts.weekly || 0} 
+          value={stats?.counts?.weekly || 0} 
           suffix="条"
         />
         <StatCard 
           icon={<ChartTrendingO />} 
           title="本月" 
-          value={stats?.counts.monthly || 0} 
+          value={stats?.counts?.monthly || 0} 
           suffix="条"
         />
       </div>

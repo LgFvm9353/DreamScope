@@ -1,9 +1,9 @@
 /* 首页容器 */
 .container {
-  min-height: 100vh;
+  height: 100vh;
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   padding-bottom: 60px; /* 修改为固定值60px，与标签栏高度一致 */
-  overflow-y: auto; /* 确保内容可滚动 */
+  overflow: hidden; 
 }
 
 /* 头部区域 */
@@ -133,8 +133,8 @@
   margin-bottom: 1.5rem;
 }
 
-/* 下拉刷新提示居中 */
-:global(.rv-pull-refresh__head) {
+/* 下拉刷新提示居中  */
+.container :global(.rv-pull-refresh__head) {
   display: flex;
   justify-content: center;
   align-items: center;

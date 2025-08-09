@@ -2,12 +2,8 @@ import { NextResponse } from 'next/server';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import { initDatabase } from '@/config/initDb';
 import { withAuth } from '@/utils/auth';
 import { existsSync } from 'fs';
-
-// 确保数据库已初始化
-initDatabase().catch(console.error);
 
 // 上传图片
 export const POST = withAuth(async (request, { userId }) => {

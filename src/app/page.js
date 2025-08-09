@@ -2,21 +2,30 @@
 
 import { NavBar, Button, Card, Cell, CellGroup, PullRefresh, Skeleton, Toast } from 'react-vant'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'  // 添加这一行导入 useRouter
+import { useRouter } from 'next/navigation'
 import styles from './page.module.css'
 import { useState, useEffect } from 'react'
 import useDreamStore from '@/store/useDreamStore'
 import useTitle from '@/hooks/useTitle'
+import { statsAPI } from '@/services/api'
+
 export default function HomePage() {
-  const router = useRouter()  // 添加这一行初始化 router
+  const router = useRouter()
   const [currentTime, setCurrentTime] = useState('')
   const [greeting, setGreeting] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const { getDreams } = useDreamStore()
   const [dreams, setDreams] = useState([])
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(null)
+  const [stats, setStats] = useState({
+    total: 0,
+    thisWeek: 0,
+    thisMonth: 0
+  })
+  
   useTitle('首页')
+
   // 获取当前时间和问候语
   useEffect(() => {
     const updateTime = () => {
@@ -45,39 +54,62 @@ export default function HomePage() {
     const interval = setInterval(updateTime, 1000)
     
     // 加载数据
-    fetchDreams()
+    fetchData()
     
     return () => clearInterval(interval)
   }, [])
 
+  // 获取统计数据
+  const fetchStats = async () => {
+    try {
+      const response = await statsAPI.getStats()
+      if (response && response.success) {
+        const { counts } = response.data
+        setStats({
+          total: counts.total || 0,
+          thisWeek: counts.weekly || 0,
+          thisMonth: counts.monthly || 0
+        })
+      }
+    } catch (error) {
+      console.error('获取统计数据失败:', error)
+      // 如果获取失败，保持默认值
+    }
+  }
+
   // 获取梦境数据
   const fetchDreams = async () => {
-    setIsLoading(true);
-    setError(null);
+    try {
+      const dreamsData = await getDreams({ _t: Date.now() })
+      setDreams(dreamsData || [])
+    } catch (error) {
+      console.error('获取梦境数据失败:', error)
+      setError('获取数据失败，请下拉刷新重试')
+      setDreams([])
+    }
+  }
+
+  // 获取所有数据
+  const fetchData = async () => {
+    setIsLoading(true)
+    setError(null)
     
     try {
-      const dreamsData = await getDreams({ _t: Date.now() });
-      setDreams(dreamsData || []);
+      // 并行获取统计数据和梦境数据
+      await Promise.all([
+        fetchStats(),
+        fetchDreams()
+      ])
     } catch (error) {
-      console.error('获取梦境数据失败:', error);
-      setError('获取数据失败，请下拉刷新重试');
-      // 如果API获取失败，使用模拟数据
-      setDreams(recentDreams);
+      console.error('获取数据失败:', error)
+      setError('获取数据失败，请下拉刷新重试')
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
-
-  // 统计数据
-  const stats = {
-    total: dreams.length || 12,
-    thisWeek: 3,
-    thisMonth: 8
   }
 
   // 处理梦境点击
   const handleDreamClick = (dream) => {
-    console.log('查看梦境详情:', dream)
     router.push(`/dream/${dream.id}`)
   }
 
@@ -89,7 +121,6 @@ export default function HomePage() {
   // 骨架屏组件
   const DreamSkeleton = () => (
     <div className={styles.container}>
-
       {/* 主要内容 */}
       <div className={styles.main}>
         {/* 记录按钮 */}
@@ -137,20 +168,22 @@ export default function HomePage() {
   }
   
   const onRefresh = async () => {
-    setRefreshing(true);
+    setRefreshing(true)
     try {
-      // 直接获取数据，不使用fetchDreams避免触发isLoading
-      const dreamsData = await getDreams({ _t: Date.now() });
-      setDreams(dreamsData || []);
+      // 刷新时重新获取所有数据
+      await Promise.all([
+        fetchStats(),
+        fetchDreams()
+      ])
       // 短暂延迟
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 500))
     } catch (error) {
-      console.error('刷新失败:', error);
+      console.error('刷新失败:', error)
     } finally {
-      setRefreshing(false);
+      setRefreshing(false)
     }
-    return;
-  };
+    return
+  }
   
   return (
     <PullRefresh
@@ -158,9 +191,6 @@ export default function HomePage() {
       successText='刷新成功'
       onRefresh={onRefresh}
     >
-      {/* <Head>
-        <title>首页</title>
-      </Head> */}
       {/* 头部区域 */}
       <NavBar 
         title={<>
@@ -227,7 +257,7 @@ export default function HomePage() {
           <Card.Body>
             {dreams.length > 0 ? (
               <CellGroup>
-                {dreams.slice(0, 5).map(dream => (
+                {dreams.slice(0, 3).map(dream => (
                   <Cell 
                     key={dream.id} 
                     title={dream.title}

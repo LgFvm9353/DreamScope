@@ -1,10 +1,6 @@
 import { NextResponse } from 'next/server';
 import Dream from '@/models/Dream';
-import { initDatabase } from '@/config/initDb';
 import { withAuth } from '@/utils/auth';
-
-// 确保数据库已初始化
-initDatabase().catch(console.error);
 
 // 获取单个梦境 - 优化版本
 export const GET = withAuth(async (request, { params, userId }) => {
